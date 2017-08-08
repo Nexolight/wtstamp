@@ -1,0 +1,29 @@
+# All data is stored here, if the directory is deleted
+# Then the records are deleted (USERHOME is replaced)
+application_data: "USERHOME/.local/share/wtstamp"
+
+# Datetime formating see http://strftime.org/
+time_format: "%d.%m.%Y %H:%M:%S"
+
+# Offset from utc in hours.
+utc_offset: 0
+
+# The minutes to work per day
+# A.e. 480
+minutes_per_day: 520
+
+# Non workdays are ignored
+# A.e. ["monday","tuesday","wednesday","thursday", "friday", "saturday", "sunday"]
+workdays: ["monday","tuesday","wednesday","thursday", "friday", "saturday", "sunday"]
+
+# This must be an array with dd/mm/yyyy
+# 
+# Allowed is a range like "dd.mm.yyyy-dd.mm.yyyy"
+# Or a single day like "dd.mm.yyyy" within an array
+#
+holidays: ["31.12.2016-01.01.2017","01.08.2017"] 
+
+# Free days by local law
+# Format is "dd.mm" within an array
+#
+specialdays: ["01.01","02.01","14.04","17.04","25.05","05.06","01.08","25.12","26.12"]
