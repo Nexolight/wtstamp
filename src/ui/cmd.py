@@ -1,11 +1,8 @@
 import argparse
 import logging
-import os
-from datetime import datetime
-from src import settings
 from src.stamper import Stamper
 from src.visualizer import Visualizer
-from models.models import Workday
+from src.utils import Utils
 
 '''
 Entry point
@@ -17,6 +14,7 @@ class CMD():
 	def __init__(self):
 		self.l = logging.getLogger(__name__+"."+self.__class__.__name__)
 		ap = argparse.ArgumentParser()
+		ap.add_argument("-I", "--display-info", dest="display_info", help="Displays info about the current workday",action="store_true")
 		ap.add_argument("-L", "--display-saldo", dest="display_saldo", help="Displays the time saldo",action="store_true")
 		ap.add_argument("-M", "--display-month", dest="display_month", help="Displays summary of month",action="store_true")
 		ap.add_argument("-W", "--display-week", dest="display_week", help="Displays summary of week",action="store_true")
@@ -30,7 +28,7 @@ class CMD():
 		stamper = Stamper()
 		visualizer = Visualizer()
 		
-		self.print_help()
+		self.print_head()
 		
 		args = ap.parse_args()
 		if args.display_saldo:
@@ -51,42 +49,18 @@ class CMD():
 			stamper.resume()
 		elif args.stamp_end:
 			stamper.end()
-		else:
-			pass
 		
-	def print_help(self):
-		'''
-		Prints the header and some useful info
-		'''
-		
-		#We want to know the last active workday
-		lastwd = Workday.loadLast(os.path.join(settings.get("application_data"),"history"))
-		
-		curwd = None
-		curbreak = None
-		if(lastwd):
-			curwd=datetime.fromtimestamp(lastwd.start).strftime(settings.get("time_format"))
-			#print(lastwd.breaks)
-			for breaks in lastwd.breaks:
-				if(breaks.get("start") and not breaks.get("end")):
-					curbreak=datetime.fromtimestamp(breaks.get("start")).strftime(settings.get("time_format"))
-					break
-		
-		#box
+		if args.display_info:
+			visualizer.day()
+			
+			
+	def print_head(self):
 		help="\n"
-		help+="|----------------------------------------|\n"
-		help+="|                                        |\n"
-		help+="|  wtstamp - a flexible timestamp tool   |\n"
-		help+="|                                        |\n"
-		help+="|----------------------------------------|\n"
-		help+="|                                        |\n"
-		if(curwd):
-			help+="| active workday >> "+curwd+"  |\n"
-		if(curbreak):
-			help+="| break since    >> "+curbreak+"  |\n"
-		help+="\n"
+		help+=Utils.pbdiv()
+		help+=Utils.pbn()
+		help+=Utils.pb("wtstamp - a flexible timestamp tool")
+		help+=Utils.pbn()
+		help+=Utils.pbdiv()
 		print(help)
-		
-		
 		
 		

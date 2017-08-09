@@ -4,6 +4,7 @@ import json
 import time
 from datetime import datetime
 from src import settings
+from src.utils import Utils
 from models.models import Workday,WorkdayJSONEncoder,WorkdayJSONDecoder
 
 class Stamper():
@@ -15,6 +16,7 @@ class Stamper():
     def new(self):
         wd = Workday()
         ts = datetime.fromtimestamp(wd.start).strftime(settings.get("time_format"))
+        self.updateWorktime(wd)
         wd.persist(self.historydir,askoverride=True)
         self.l.info("New workday started at "+ts)
     
@@ -27,6 +29,7 @@ class Stamper():
                 self.l.error("You need to stop the break started since "+breaktime+" first")
                 return
         wd.breaks.append({"start":time.time(),"end":None})
+        self.updateWorktime(wd)
         wd.persist(self.historydir)
         self.l.info("Workday paused!")
     
@@ -41,6 +44,7 @@ class Stamper():
         if(not found):
             self.l.error("There's no break going on")
         else:
+            self.updateWorktime(wd)
             wd.persist(self.historydir)
             self.l.info("Workday resumed!")
     
@@ -51,7 +55,7 @@ class Stamper():
                 breaktime = datetime.fromtimestamp(breaks.get("start")).strftime(settings.get("time_format"))
                 self.l.error("There's a break going on since "+breaktime)
                 try:
-                    uip = input("How many minutes? ")
+                    uip = input("How many minutes? :")
                     now = time.time()
                     resumetime = breaks.get("start") + (int(uip) * 60)
                     if(resumetime > now):
@@ -61,11 +65,14 @@ class Stamper():
                 except:
                     self.end()
         wd.end = time.time()
+        self.updateWorktime(wd)
         wd.persist(self.historydir)
         self.l.info("Workday ended!")
         
-
-            
+    def updateWorktime(self, wd):
+        stats = Utils.getWDStats(wd)
+        self.l.debug("worktime: "+datetime.utcfromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
+        self.l.debug("breaktime: "+datetime.utcfromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
     
     
         
