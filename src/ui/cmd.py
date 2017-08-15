@@ -1,8 +1,10 @@
 import argparse
 import logging
+import time
 from src.stamper import Stamper
 from src.visualizer import Visualizer
 from src.utils import Utils
+from src.settings import SettingsHelper
 
 '''
 Entry point
@@ -25,7 +27,7 @@ class CMD():
 		ap.add_argument("-r", "--stamp-resume", dest="stamp_resume", help="Resumes the current workday",action="store_true")
 		ap.add_argument("-e", "--stamp-end", dest="stamp_end", help="Ends the workday",action="store_true")
 		ap.add_argument("-X", "--test", dest="test", help="Dev option",action="store_true")
-		
+		SettingsHelper.rangesToArray()
 		stamper = Stamper()
 		visualizer = Visualizer()
 		
@@ -35,9 +37,9 @@ class CMD():
 		if args.display_saldo:
 			visualizer.saldo()
 		elif args.display_month:
-			visualizer.month()
+			visualizer.month(time.time())
 		elif args.display_week:
-			visualizer.week()
+			visualizer.week(time.time())
 		elif args.display_last:
 			visualizer.last()
 		elif args.display_open:
@@ -51,7 +53,7 @@ class CMD():
 		elif args.stamp_end:
 			stamper.end()
 		elif args.test:
-			Utils.getRequiredWork()
+			Utils.test()
 		
 		if args.display_info:
 			visualizer.day()

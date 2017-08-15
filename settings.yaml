@@ -5,9 +5,21 @@ application_data: "USERHOME/.local/share/wtstamp"
 # Datetime formating see http://strftime.org/
 time_format: "%d.%m.%Y %H:%M:%S"
 
+# date format (only affects output)
+date_format: "(%a) %d.%m.%Y"
+
 # The minutes to work per day
 # A.e. 480
 minutes_per_day: 522
+
+# The day where a workyear starts again.
+# dd.mm
+year_swap: "01.08"
+
+# Basically the range from where calculations are allowed.
+# workdays holidays and specialdays are applied after the allowed range.
+# A.e. ["01.01.2017-31.12.2018"] (dd.mm.yyyy)
+calc_cycles: ["14.08.2017-31.12.2020"]
 
 # Non workdays are ignored
 # A.e. ["monday","tuesday","wednesday","thursday", "friday", "saturday", "sunday"]

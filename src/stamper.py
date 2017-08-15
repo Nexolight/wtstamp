@@ -10,7 +10,7 @@ from models.models import Workday,WorkdayJSONEncoder,WorkdayJSONDecoder
 class Stamper():
     def __init__(self):
         self.l = logging.getLogger(__name__+"."+self.__class__.__name__)
-        self.historydir = os.path.join(settings.get("application_data"),"history")
+        self.historydir = settings.get("history_data")
         
     
     def new(self):
