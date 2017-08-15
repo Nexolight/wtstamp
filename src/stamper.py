@@ -50,6 +50,9 @@ class Stamper():
     
     def end(self):
         wd = Workday.loadLast(self.historydir)
+        if(not wd):
+            self.l.error("There's no workday started yet")
+            return 
         for breaks in wd.breaks:
             if(breaks.get("start") and not breaks.get("end")):
                 breaktime = datetime.fromtimestamp(breaks.get("start")).strftime(settings.get("time_format"))
