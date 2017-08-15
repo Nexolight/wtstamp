@@ -131,7 +131,7 @@ class Visualizer():
             t_wd=wdIM.get("workday")
             t_ts=wdIM.get("timestamp")
             t_dt=datetime.fromtimestamp(t_ts).strftime(settings.get("date_format"))
-            if(t_wd):
+            if(t_wd and not Utils.isFree(t_ts)):
                 info+=Utils.pb(Utils.pfl())
                 worktime=Utils.formatHM(Utils.getWDStats(t_wd).get("worktime"))
                 w_wds=t_wd.start
@@ -146,6 +146,8 @@ class Visualizer():
                 info+=Utils.pb(Utils.pf(datestr,c1)+" | "+Utils.pf(wdStart+" - "+wdEnd,c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf(worktime,c4))
             elif(Utils.isFree(t_ts)):
                 pass
+                #info+=Utils.pb(Utils.pfl())
+                #info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(Utils.formatHM(0),c3)+" | "+Utils.pf(Utils.formatHM(0),c4))
             else:
                 info+=Utils.pb(Utils.pfl())
                 info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf(Utils.formatHM(0),c4))
