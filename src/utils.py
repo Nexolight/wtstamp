@@ -14,10 +14,6 @@ class Utils:
         pass
     
     @staticmethod
-    def test():
-        Utils.getRequiredWorkYear(time.time())
-    
-    @staticmethod
     def getDatesFromRange(dS,dE):
         '''
         Returns an array with all dates within the given range
@@ -312,6 +308,7 @@ class Utils:
             if(breaks.get("start") and breaks.get("end")):
                 breaktime+=breaks.get("end")-breaks.get("start")
             elif(breaks.get("start") and not breaks.get("end") and not wd.end):
+                breaktime+=time.time()-breaks.get("start")
                 last_stamp=breaks.get("start")
         worktime=last_stamp-wd.start
         worktime-=breaktime
@@ -363,21 +360,12 @@ class Utils:
         return text
     
     @staticmethod
-    def pfb(text="",size=settings.get("border_width")-5):
+    def pfb(text="",size=settings.get("border_width")-5,symbol="#"):
         '''
         Fills the given string with # up to the given count
         '''
         if(len(text)<size):
-            return text+("#"*(size-len(text)))
-        return text
-    
-    @staticmethod
-    def pfdl(text="",size=settings.get("border_width")-5):
-        '''
-        Fills the given string with = up to the given count
-        '''
-        if(len(text)<size):
-            return text+("="*(size-len(text)))
+            return text+(symbol*(size-len(text)))
         return text
     
     @staticmethod
@@ -390,14 +378,14 @@ class Utils:
         return text
     
     @staticmethod
-    def head(text):
+    def head(text, underline=settings.get("border_width")-5,symbol="#"):
         '''
         Returns a head
         '''
         str=""
         str+=Utils.pbn()
         str+=Utils.pb(text)
-        str+=Utils.pb(Utils.pfb(""))
+        str+=Utils.pb(Utils.pfb("",size=underline,symbol=symbol))
         return str
     
     @staticmethod

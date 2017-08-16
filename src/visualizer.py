@@ -13,42 +13,62 @@ class Visualizer():
         self.historydir = settings.get("history_data")
         pass
     
-    def day(self):
+    def ongoing(self):
         '''
-        Print infos about the ongoing workday
+        Print infos about a workday
         '''
         #We want to know the last active workday
         lastwd = Workday.loadLast(settings.get("history_data"))
-        info=Utils.head("Active workday")
-        curwd = None
-        curbreak = None
-        stats = None
-        if(lastwd):
-            curwd=datetime.fromtimestamp(lastwd.start).strftime(settings.get("time_format"))
-            stats=Utils.getWDStats(lastwd) #datetime.utcfromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss")
-            #print(lastwd.breaks)
-            for breaks in lastwd.breaks:
-                if(breaks.get("start") and not breaks.get("end")):
-                    curbreak=datetime.fromtimestamp(breaks.get("start")).strftime(settings.get("time_format"))
-                    break
+        daystr=datetime.fromtimestamp(lastwd.start).strftime(settings.get("date_format"))
+        info=Utils.head("Active Workday: "+daystr,symbol="~")
         info+=Utils.pbn()
-        if(curwd):
-            info+=Utils.pb("active workday >> "+curwd)
+        if(lastwd):
+            info+=self._getSingleDay(lastwd)
         else:
-            info+=Utils.pb("No active workday")
-        if(curwd and curbreak):
-            info+=Utils.pb("break since    >> "+curbreak)
-        elif(curwd and not curbreak):
-            info+=Utils.pb("break since    >> currently working")
-        if(stats):
+            self.l.error("Could not find the last open workday")
+        info+=Utils.pbn()
+        info+=Utils.pbdiv()
+        print(info)
+        
+    def last(self):
+        '''
+        Prints the last closed day
+        '''
+        #dateObjNow=datetime.fromtimestamp(time.time()).date()
+        wd=None
+        for ydObj in reversed(Utils.getYearDates(time.time())):
+            loadedWDObj=Workday.loadDay(self.historydir,ydObj.get("timestamp"))
+            lwd=loadedWDObj.get("workday")
+            if(lwd and lwd.end):
+                wd=lwd
+                break
+        if(wd):
+            daystr=datetime.fromtimestamp(wd.start).strftime(settings.get("date_format"))
+            info=Utils.head("Day: "+daystr,symbol="~")
             info+=Utils.pbn()
-            info+=Utils.pb("required       >> "+datetime.utcfromtimestamp(settings.get("minutes_per_day")*60).strftime("%Hh %Mm %Ss"))
-            info+=Utils.pbn()
-            info+=Utils.pb("worktime       >> "+datetime.utcfromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
-            info+=Utils.pb("breaktime      >> "+datetime.utcfromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))
+            info+=self._getSingleDay(wd)
             info+=Utils.pbn()
             info+=Utils.pbdiv()
-        print(info)
+            print(info)
+            return
+        self.l.error("Could not find the last closed workday")
+        
+    def day(self,ts):
+        '''
+        Prints the given day
+        '''
+        wdo=Workday.loadDay(self.historydir,ts)
+        wd=wdo.get("workday")
+        if(wd):
+            daystr=datetime.fromtimestamp(wd.start).strftime(settings.get("date_format"))
+            info=Utils.head("Day: "+daystr,symbol="~")
+            info+=Utils.pbn()
+            info+=self._getSingleDay(wd)
+            info+=Utils.pbn()
+            info+=Utils.pbdiv()
+            print(info)
+            return
+        self.l.error("Could not find the specified day: "+datetime.fromtimestamp(ts).strftime(settings.get("date_format")))
     
     def saldo(self):
         '''
@@ -102,7 +122,7 @@ class Visualizer():
         info=Utils.head("This month:")
         info+=Utils.pbn()
         info+=self._getTbl(Workday.loadMonth(self.historydir,ts))
-        info+=Utils.pb(Utils.pfdl())
+        info+=Utils.pb(Utils.pfb(symbol="="))
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
@@ -111,7 +131,7 @@ class Visualizer():
         info=Utils.head("This week:")
         info+=Utils.pbn()
         info+=self._getTbl(Workday.loadWeek(self.historydir,ts))
-        info+=Utils.pb(Utils.pfdl())
+        info+=Utils.pb(Utils.pfb(symbol="="))
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
@@ -155,13 +175,43 @@ class Visualizer():
                 #info+=Utils.pb(str(wkm.get("date"))+" free")
         return info
     
-    
-    def last(self):
-        self.l.info("Generating visualization from last closed workday...")
-    
-    def open(self):
-        self.l.info("Generating visualization from currently open workday...")
-    
-    
+    def _getSingleDay(self, wd):
+        '''
+        Returns a complete view of the given workday
+        '''
+        width = settings.get("border_width")-8
+        c1 = floor(width/10*3)
+        c2 = floor(width/10*7)
+        
+        startStr=datetime.fromtimestamp(wd.start).strftime(settings.get("time_format"))
+        endStr=datetime.fromtimestamp(time.time()).strftime(settings.get("time_format")+" (ongoing)")
+        if(wd.end):
+           endStr=datetime.fromtimestamp(wd.end).strftime(settings.get("time_format"))
+        
+        wdstats=Utils.getWDStats(wd)
+        
+        info=""
+        if(Utils.isFree(wd.start)):
+                info+=Utils.pb("THIS IS A FREE DAY")
+                info+=Utils.pbn()
+        info+=Utils.pb(Utils.pf("Day started",c1)+" > "+Utils.pf(startStr,c2))
+        info+=Utils.pb(Utils.pf("Day ended",c1)+" > "+Utils.pf(endStr,c2))
+        info+=Utils.pbn()
+        if(len(wd.breaks) > 0):
+            info+=Utils.pb(Utils.pf("breaks",c1)+" > "+Utils.pf(Utils.formatHM(wdstats.get("breaktime")),c2))
+            for bk in wd.breaks:
+                bkStart=bk.get("start")
+                bkEnd=bk.get("end")
+                bkStartStr=datetime.fromtimestamp(bkStart).strftime("%H:%M")
+                bkEndStr=datetime.fromtimestamp(time.time()).strftime("%H:%M (ongoing)")
+                if(bkEnd):
+                    bkEndStr=datetime.fromtimestamp(bkEnd).strftime("%H:%M")
+                info+=Utils.pb(Utils.pf("",c1)+" ^ "+Utils.pf(bkStartStr+" - "+bkEndStr,c2))
+        else:
+            info+=Utils.pb(Utils.pf("Breaks",c1)+" > "+Utils.pf("No breaks",c2))
+        info+=Utils.pbn()
+        info+=Utils.pb(Utils.pf("Worktime",c1)+" > "+Utils.pf(Utils.formatHM(wdstats.get("worktime")),c2))
+        return info
+                
     
     
