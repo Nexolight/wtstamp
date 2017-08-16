@@ -404,18 +404,42 @@ class Utils:
     def formatDHM(ts):
         txt=""
         wd=settings.get("minutes_per_day")*60
-        days=floor(ts/wd)
+        daysf=ts/wd
+        if(daysf > 0):
+            days=floor(daysf)
+        else:
+            days=ceil(daysf)
         txt+=str(days)+"wd "
         ts=ts-(days*wd)
-        txt+=str(floor(ts/3600))+"h "
-        txt+=str(floor(ts%3600/60))+"m "
+        hoursf=ts/3600
+        if(hoursf > 0):
+            hours=floor(hoursf)
+        else:
+            hours=ceil(hoursf)
+        txt+=str(hours)+"h "
+        minutesf=ts%3600/60
+        if(minutesf > 0):
+            minutes=floor(minutesf)
+        else:
+            minutes=ceil(minutesf)
+        txt+=str(minutes)+"m "
         return txt
     
     @staticmethod
     def formatHM(ts):
         txt=""
-        txt+=str(floor(ts/3600))+"h "
-        txt+=str(floor(ts%3600/60))+"m "
+        hoursf=ts/3600
+        if(hoursf > 0):
+            hours=floor(hoursf)
+        else:
+            hours=ceil(hoursf)
+        txt+=str(hours)+"h "
+        minutesf=ts%3600/60
+        if(minutesf > 0):
+            minutes=floor(minutesf)
+        else:
+            minutes=ceil(minutesf)
+        txt+=str(minutes)+"m "
         return txt
         
         

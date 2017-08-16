@@ -62,15 +62,16 @@ class Visualizer():
         c2w=int(width/10*3)
         c3w=int(width/10*3)
         
-        rhYear=str(floor(reqw.get("year")/3600))+"h "+str(floor(reqw.get("year")%3600/60))+"m"
-        rhMonth=str(floor(reqw.get("month")/3600))+"h "+str(floor(reqw.get("month")%3600/60))+"m"
-        rhWeek=str(floor(reqw.get("week")/3600))+"h "+str(floor(reqw.get("week")%3600/60))+"m"
-        rhDay=str(floor(reqw.get("day")/3600))+"h "+str(floor(reqw.get("day")%3600/60))+"m"
+        rhYear=Utils.formatDHM(reqw.get("year"))
+        rhMonth=Utils.formatDHM(reqw.get("month"))
+        rhWeek=Utils.formatHM(reqw.get("week"))
+        rhDay=Utils.formatHM(reqw.get("day"))
+
         
-        dhYear=str(floor(donew.get("year")/3600))+"h "+str(floor(donew.get("year")%3600/60))+"m"
-        dhMonth=str(floor(donew.get("month")/3600))+"h "+str(floor(donew.get("month")%3600/60))+"m"
-        dhWeek=str(floor(donew.get("week")/3600))+"h "+str(floor(donew.get("week")%3600/60))+"m"
-        dhDay=str(floor(donew.get("day")/3600))+"h "+str(floor(donew.get("day")%3600/60))+"m"
+        dhYear=Utils.formatDHM(donew.get("year"))
+        dhMonth=Utils.formatDHM(donew.get("month"))
+        dhWeek=Utils.formatHM(donew.get("week"))
+        dhDay=Utils.formatHM(donew.get("day"))
         
         thAcc=Utils.formatDHM(-reqw.get("now")+donew.get("now"))
             
