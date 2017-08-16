@@ -10,6 +10,8 @@ Lucy von Kaenel - snow.dream.ch@gmail.com
 
 ```
 
+./wtstamp -h
+
 |-----------------------------------------------------------------------------|
 |                                                                             |
 | wtstamp - a flexible timestamp tool                                         |
@@ -32,6 +34,11 @@ optional arguments:
 
 
 ```
+
+### What is this?
+
+A tool to make timestamps and calculations based on them on how long you have worked,
+how long you need to work in order to meet the requirements.
 
 
 ### How does it work?
