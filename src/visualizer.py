@@ -19,16 +19,16 @@ class Visualizer():
         '''
         #We want to know the last active workday
         lastwd = Workday.loadLast(settings.get("history_data"))
-        daystr=datetime.fromtimestamp(lastwd.start).strftime(settings.get("date_format"))
-        info=Utils.head("Active Workday: "+daystr,symbol="~")
-        info+=Utils.pbn()
         if(lastwd):
+            daystr=datetime.fromtimestamp(lastwd.start).strftime(settings.get("date_format"))
+            info=Utils.head("Active Workday: "+daystr,symbol="~")
+            info+=Utils.pbn()
             info+=self._getSingleDay(lastwd)
-        else:
-            self.l.error("Could not find the last open workday")
-        info+=Utils.pbn()
-        info+=Utils.pbdiv()
-        print(info)
+            info+=Utils.pbn()
+            info+=Utils.pbdiv()
+            print(info)
+            return
+        self.l.error("Could not find the last open workday")
         
     def last(self):
         '''
