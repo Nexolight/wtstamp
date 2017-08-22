@@ -18,7 +18,7 @@ Lucy von Kaenel - snow.dream.ch@gmail.com
 |                                                                             |
 |-----------------------------------------------------------------------------|
 usage: wtstamp.py [-h] [-n] [-p] [-r] [-e] [-S] [-L] [-D [dd.mm.yyyy]]
-                  [-W [dd.mm.yyyy]] [-M [mm.yyyy]]
+                  [-W [dd.mm.yyyy]] [-M [mm.yyyy]] [-Y [yyyy]]
 
 optional arguments:
   -h, --help                         show this help message and exit
@@ -31,7 +31,7 @@ optional arguments:
   -D, --display-day   [dd.mm.yyyy]   Displays info about a workday - default this day
   -W, --display-week  [dd.mm.yyyy]   Displays summary of week - default this week
   -M, --display-month [mm.yyyy]      Displays summary of month - default this month
-
+  -Y, --display-year  [yyyy]         Displays summary of the year
 
 ```
 
@@ -57,16 +57,19 @@ to keep things portable.
 
 * Saldo view which will show required and done work for the whole year, month, week and day plus the difference/balance at the moment (realtime).
 * Day view which will show start, end, worktime, breaktime and break ranges. For ongoing days or breaks this is realitime.
-* Week and Month view. Shows a table with the non-free days listed with their dates, start, end, required worktime and work done. For ongoing days this is realtime.
+* Week view. Shows a table with the non-free days listed with their dates, start, end, required worktime and work done. For ongoing days this is realtime.
+* Month view. (Just like week view)
+* Year view. (Just like month view)
 
 **Settings allow you to change:**
 
 * Application data directory
 * The format times and dates are presented (limited)
-* Time to work per day
 * When a year is considered a "new year" worktime wise (affects some views)
-* The calculation cycles itself. Files are either ignored or read depending on that.
-* workdays, holidays, specialdays
+* Calc cycles (User defined ranges with different work conditions)
+  * Time to work per day
+  * workdays
+* Free days a.e. holidays or yearly specialdays
 
 
 ### What does it better, or why this tool exists?
