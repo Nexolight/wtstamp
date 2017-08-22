@@ -59,8 +59,6 @@ class CMD():
 			stamper.resume()
 		elif args.stamp_end:
 			stamper.end()
-		elif args.dev:
-			visualizer.test()
 		
 		if args.display_info:
 			if(isinstance(args.display_info, str)):
