@@ -121,6 +121,18 @@ class Visualizer():
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
+        
+    def year(self, ts):
+        '''
+        Print a month table from the given month
+        '''
+        info=Utils.head("Year view:")
+        info+=Utils.pbn()
+        info+=self._getTbl(Workday.loadYear(self.historydir,ts))
+        info+=Utils.pb(Utils.pfb(symbol="="))
+        info+=Utils.pbn()
+        info+=Utils.pbdiv()
+        print(info)
     
     def month(self, ts):
         '''

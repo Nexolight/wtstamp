@@ -18,7 +18,6 @@ class CMD():
 	def __init__(self):
 		self.l = logging.getLogger(__name__+"."+self.__class__.__name__)
 		ap = argparse.ArgumentParser()
-		ap.add_argument("-X", "--dev", dest="dev", help="Dev option - do not use",action="store_true")
 		ap.add_argument("-n", "--stamp-new", dest="stamp_new", help="Starts a new workday",action="store_true")
 		ap.add_argument("-p", "--stamp-pause", dest="stamp_pause", help="Pauses the current workday",action="store_true")
 		ap.add_argument("-r", "--stamp-resume", dest="stamp_resume", help="Resumes the current workday",action="store_true")
@@ -28,6 +27,7 @@ class CMD():
 		ap.add_argument("-D", "--display-day", dest="display_info", default=None, const=time.time(), nargs="?", metavar="dd.mm.yyyy", help="Displays info about a workday")
 		ap.add_argument("-W", "--display-week", dest="display_week", default=None, const=time.time(), nargs="?", metavar="dd.mm.yyyy", help="Displays summary of week")
 		ap.add_argument("-M", "--display-month", dest="display_month", default=None, const=time.time(), nargs="?", metavar="mm.yyyy", help="Displays summary of month")
+		ap.add_argument("-Y", "--display-year", dest="display_year", default=None, const=time.time(), nargs="?", metavar="yyyy", help="Displays summary of the year")
 		
 		SettingsHelper.rangesToArray()
 		stamper = Stamper()
@@ -45,6 +45,10 @@ class CMD():
 			if(isinstance(args.display_week, str)):
 				args.display_week=datetime.strptime(args.display_week, "%d.%m.%Y").timestamp()
 			visualizer.week(args.display_week)
+		elif args.display_year:
+			if(isinstance(args.display_year, str)):
+				args.display_year=datetime.strptime(args.display_year, "%Y").timestamp()
+			visualizer.year(args.display_year)
 		elif args.display_last:
 			visualizer.last()
 		elif args.stamp_new:
