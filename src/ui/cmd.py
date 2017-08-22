@@ -18,6 +18,7 @@ class CMD():
 	def __init__(self):
 		self.l = logging.getLogger(__name__+"."+self.__class__.__name__)
 		ap = argparse.ArgumentParser()
+		ap.add_argument("-X", "--dev", dest="dev", help="Dev option - do not use",action="store_true")
 		ap.add_argument("-n", "--stamp-new", dest="stamp_new", help="Starts a new workday",action="store_true")
 		ap.add_argument("-p", "--stamp-pause", dest="stamp_pause", help="Pauses the current workday",action="store_true")
 		ap.add_argument("-r", "--stamp-resume", dest="stamp_resume", help="Resumes the current workday",action="store_true")
@@ -54,6 +55,8 @@ class CMD():
 			stamper.resume()
 		elif args.stamp_end:
 			stamper.end()
+		elif args.dev:
+			visualizer.test()
 		
 		if args.display_info:
 			if(isinstance(args.display_info, str)):

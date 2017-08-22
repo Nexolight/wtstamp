@@ -6,24 +6,41 @@ application_data: "USERHOME/.local/share/wtstamp"
 time_format: "%d.%m.%Y %H:%M:%S"
 
 # date format (only affects output)
+# A.e. in Month/Week/Day views
 date_format: "(%a) %d.%m.%Y"
 
-# The minutes to work per day
-# A.e. 480
-minutes_per_day: 522
+# date format (only affects output)
+# A.e. in saldo view
+date_simple_format: "%d.%m.%Y"
 
 # The day where a workyear starts again.
 # dd.mm
 year_swap: "01.08"
 
-# Basically the range from where calculations are allowed.
-# workdays holidays and specialdays are applied after the allowed range.
-# A.e. ["01.01.2017-31.12.2018"] (dd.mm.yyyy)
-calc_cycles: ["14.08.2017-31.12.2020"]
+# Under calc_cycles we define a f few settings to how
+# required and done work is calculated.
+# 
+# Each cycle must have:
+# workday:          An array like in the example below with the days when you work.
+# range:            The timespan for which these days are valid. 
+#                   This must be an array out of strings like in the example.
+#                   (dd.mm.yyyy-dd.mm.yyyy)
+# minutes_per_day:  An integer with the amount of minutes you work per day within the
+#                   specified range
+# 
+#calc_cycles:
+#  - workdays: ["monday","tuesday","wednesday","thursday", "friday", "saturday", "sunday"]
+#    range: ["01.08.2017-31.07.2018"]
+#    minutes_per_day: 522
+#  - workdays: ["monday","tuesday","wednesday"]
+#    range: ["01.08.2018-31.07.2019"]
+#    minutes_per_day: 522
+#
+calc_cycles:
+  - workdays: ["monday","tuesday","wednesday"]
+    range: ["14.08.2017-31.07.2020"]
+    minutes_per_day: 522
 
-# Non workdays are ignored
-# A.e. ["monday","tuesday","wednesday","thursday", "friday", "saturday", "sunday"]
-workdays: ["monday","tuesday","wednesday"]
 
 # This must be an array with dd/mm/yyyy
 # 

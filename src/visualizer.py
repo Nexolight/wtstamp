@@ -13,6 +13,9 @@ class Visualizer():
         self.historydir = settings.get("history_data")
         pass
     
+    def test(self):
+        pass
+    
     def ongoing(self):
         '''
         Print infos about a workday
@@ -74,32 +77,36 @@ class Visualizer():
         '''
         Print salo todo/done and time account
         '''
-        reqw = Utils.getRequiredWork(time.time())
-        donew = Utils.getDoneWork(self.historydir,time.time())
+        now=time.time()
+        nowd=datetime.fromtimestamp(now)
+        reqw = Utils.getRequiredWork(now)
+        donew = Utils.getDoneWork(self.historydir,now)
         lastwd = Workday.loadLast(settings.get("history_data"))
         width = settings.get("border_width")-11
         c1w=int(width/10*4)
         c2w=int(width/10*3)
         c3w=int(width/10*3)
         
-        rhYear=Utils.formatDHM(reqw.get("year"))
-        rhMonth=Utils.formatDHM(reqw.get("month"))
+        rhYear=Utils.formatHM(reqw.get("year"))
+        rhMonth=Utils.formatHM(reqw.get("month"))
         rhWeek=Utils.formatHM(reqw.get("week"))
         rhDay=Utils.formatHM(reqw.get("day"))
 
         
-        dhYear=Utils.formatDHM(donew.get("year"))
-        dhMonth=Utils.formatDHM(donew.get("month"))
+        dhYear=Utils.formatHM(donew.get("year"))
+        dhMonth=Utils.formatHM(donew.get("month"))
         dhWeek=Utils.formatHM(donew.get("week"))
         dhDay=Utils.formatHM(donew.get("day"))
         
-        thAcc=Utils.formatDHM(-reqw.get("now")+donew.get("now"))
+        thAcc=Utils.formatHM(-reqw.get("now")+donew.get("now"))
+        switchTS=datetime.strptime(settings.get("year_swap")+"."+str(nowd.year), "%d.%m.%Y").timestamp()
+        switchDate=datetime.fromtimestamp(switchTS).strftime(settings.get("date_simple_format"))
             
         info=info=Utils.head("Saldo")
         info+=Utils.pbn()
         info+=Utils.pb(Utils.pf("Entity",c1w)+" | "+Utils.pf("Required ",c2w)+" | "+Utils.pf("Worked ",c3w))
         info+=Utils.pb("-"*(settings.get("border_width")-5))
-        info+=Utils.pb(Utils.pf("Year",c1w)+" | "+Utils.pf(rhYear,c2w)+" | "+Utils.pf(dhYear,c3w))
+        info+=Utils.pb(Utils.pf("Year (until "+switchDate+")",c1w)+" | "+Utils.pf(rhYear,c2w)+" | "+Utils.pf(dhYear,c3w))
         info+=Utils.pb(Utils.pf("Month",c1w)+" | "+Utils.pf(rhMonth,c2w)+" | "+Utils.pf(dhMonth,c3w))
         info+=Utils.pb(Utils.pf("Week",c1w)+" | "+Utils.pf(rhWeek,c2w)+" | "+Utils.pf(dhWeek,c3w))
         if(lastwd and not lastwd.end and datetime.fromtimestamp(lastwd.start).date() != datetime.fromtimestamp(time.time()).date()):
@@ -119,7 +126,7 @@ class Visualizer():
         '''
         Print a month table from the given month
         '''
-        info=Utils.head("This month:")
+        info=Utils.head("Month view:")
         info+=Utils.pbn()
         info+=self._getTbl(Workday.loadMonth(self.historydir,ts))
         info+=Utils.pb(Utils.pfb(symbol="="))
@@ -128,7 +135,7 @@ class Visualizer():
         print(info)
     
     def week(self, ts):
-        info=Utils.head("This week:")
+        info=Utils.head("Week view:")
         info+=Utils.pbn()
         info+=self._getTbl(Workday.loadWeek(self.historydir,ts))
         info+=Utils.pb(Utils.pfb(symbol="="))
@@ -147,12 +154,12 @@ class Visualizer():
         c3=int(width/10*2)
         c4=int(width/10*2)
         info+=Utils.pb(Utils.pf("Day",c1)+" | "+Utils.pf("Range",c2)+" | "+Utils.pf("Required",c3)+" | "+Utils.pf("Worked",c4))
-        reqdstr=Utils.formatHM(settings.get("minutes_per_day")*60)
         for wdIM in loadedWDs:
             t_wd=wdIM.get("workday")
             t_ts=wdIM.get("timestamp")
             t_dt=datetime.fromtimestamp(t_ts).strftime(settings.get("date_format"))
             if(t_wd and not Utils.isFree(t_ts)):
+                reqdstr=Utils.formatHM(settings.get("calc_cycles").get(wdIM.get("date")).get("minutes_per_day")*60)
                 info+=Utils.pb(Utils.pfl())
                 worktime=Utils.formatHM(Utils.getWDStats(t_wd).get("worktime"))
                 w_wds=t_wd.start
@@ -170,6 +177,7 @@ class Visualizer():
                 #info+=Utils.pb(Utils.pfl())
                 #info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(Utils.formatHM(0),c3)+" | "+Utils.pf(Utils.formatHM(0),c4))
             else:
+                reqdstr=Utils.formatHM(settings.get("calc_cycles").get(wdIM.get("date")).get("minutes_per_day")*60)
                 info+=Utils.pb(Utils.pfl())
                 info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf(Utils.formatHM(0),c4))
                 #info+=Utils.pb(str(wkm.get("date"))+" free")

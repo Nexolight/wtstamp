@@ -207,7 +207,7 @@ class Utils:
         now=time.time()
         for mothdts in Utils.getYearDates(now):
             if(not Utils.isFree(mothdts.get("timestamp"))):
-                work+=settings.get("minutes_per_day")*60
+                work+=Utils.getMinutesPerDay(mothdts.get("timestamp"))
             if(mothdts.get("date")==datetime.fromtimestamp(now).date()):
                 break
         return work;
@@ -218,7 +218,7 @@ class Utils:
         returns the work to be done this day
         '''
         if(not Utils.isFree(ts)):
-            return settings.get("minutes_per_day")*60
+            return Utils.getMinutesPerDay(ts)
         return 0
     
     @staticmethod
@@ -229,7 +229,7 @@ class Utils:
         work=0
         for weekdate in Utils.getWeekdates(ts): #cumulate time for all non free days
             if(not Utils.isFree(weekdate.get("timestamp"))):
-                work+=settings.get("minutes_per_day")*60
+                work+=Utils.getMinutesPerDay(weekdate.get("timestamp"))
         return work
         
     
@@ -241,7 +241,7 @@ class Utils:
         work=0
         for wkd in Utils.getMonthdates(ts):
             if(not Utils.isFree(wkd.get("timestamp"))):
-                work+=settings.get("minutes_per_day")*60
+                work+=Utils.getMinutesPerDay(wkd.get("timestamp"))
         return work
     
     
@@ -250,7 +250,7 @@ class Utils:
         work=0
         for mothdts in Utils.getYearDates(ts):
             if(not Utils.isFree(mothdts.get("timestamp"))):
-                work+=settings.get("minutes_per_day")*60
+                work+=Utils.getMinutesPerDay(mothdts.get("timestamp"))
         return work
     
     @staticmethod
@@ -258,9 +258,16 @@ class Utils:
         '''
         Returns true when the day of the date is in the calc cycle.
         '''
-        strdate=datetime.fromtimestamp(ts).strftime("%d.%m.%Y")
-        if strdate in settings.get("calc_cycles"):
+        dat=datetime.fromtimestamp(ts).date()
+        if settings.get("calc_cycles").get(dat):
             return True
+    
+    @staticmethod
+    def getMinutesPerDay(ts):
+        '''
+        Returns the required worktime in minutes for the date at the given timestamp
+        '''
+        return settings.get("calc_cycles").get(datetime.fromtimestamp(ts).date()).get("minutes_per_day")*60
     
     @staticmethod
     def isFree(dt):
@@ -268,25 +275,24 @@ class Utils:
         Returns true when the day of the date is either a holiday,
         specialday, non workday or not within the calc cycle.
         '''
+        dat = datetime.fromtimestamp(dt).date()
         daystr = datetime.fromtimestamp(dt).strftime("%A").lower()
         datestr = datetime.fromtimestamp(dt).strftime("%d.%m.%Y")
         yearstr = datetime.fromtimestamp(dt).strftime("%Y")
         
-        #workdays from settings
-        s_workdays=settings.get("workdays")
-        
         #holidays from settings
         s_holidays=settings.get("holidays")
         
-        #Special days in the settings miss the year
+        #Specialdays are free
         s_specialdays=[]
         for specialday in settings.get("specialdays"):
-            s_specialdays.append(specialday+"."+yearstr)
-            
-        if(datestr not in settings.get("calc_cycles")):
+            s_specialdays.append(specialday+"."+yearstr)#Special days in the settings miss the year
+        
+        #Everything what is not in the calc_cycle is a free day
+        if(not settings.get("calc_cycles").get(dat)):#only dates from a user defined range are there
             return True
         
-        if(daystr not in s_workdays or (datestr in s_holidays or datestr in s_specialdays)):
+        if(daystr not in settings.get("calc_cycles").get(dat).get("workdays") or (datestr in s_holidays or datestr in s_specialdays)):
             return True
         return False
     
@@ -391,13 +397,13 @@ class Utils:
     @staticmethod
     def formatDHM(ts):
         txt=""
-        wd=settings.get("minutes_per_day")*60
+        wd=86400
         daysf=ts/wd
         if(daysf > 0):
             days=floor(daysf)
         else:
             days=ceil(daysf)
-        txt+=str(days)+"wd "
+        txt+=str(days)+"d "
         ts=ts-(days*wd)
         hoursf=ts/3600
         if(hoursf > 0):
