@@ -117,7 +117,7 @@ class Visualizer():
             info+=Utils.pb(Utils.pf("Today",c1w)+" | "+Utils.pf(rhDay,c2w)+" | "+Utils.pf(dhDay,c3w))
         info+=Utils.pb("-"*(settings.get("border_width")-5))
         info+=Utils.pbn()
-        info+=Utils.pb("Time account: "+thAcc)
+        info+=Utils.pb("Time account (right now): "+thAcc)
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
