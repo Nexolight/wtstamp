@@ -51,7 +51,15 @@ All calculations are realtime base on the settings in settings.yaml and these ra
 to keep things portable.
 
 
+---
+
+
 ### Capabilities
+
+**Stamps:**
+
+* Start/End a Workday (only one open at a time. Mistakes require a simple json edit)
+* Start/Stop breaks
 
 **Views:**
 
@@ -72,17 +80,47 @@ to keep things portable.
 * Free days a.e. holidays or yearly specialdays
 
 
+---
+
+
+### Who wants to use this?
+
+TLDR: Some command line nerds (with optional unusual worktimes) in case there's no
+more suitable alternate or you just like it old school.
+
+The tool itself doesn't lack essential features in my opinion based
+on what I'm using it for. It is however not made for the casual user
+which is intentional to some degree. At least the user needs to understand
+yaml config files, read comments there, understand json and must be able to use the console.
+
+The tool was not made for companies but for personal usage. It's not intended to be used
+as a service provided via some web interface (although it might be possible).
+
+
+---
+
+
 ### What does it better, or why this tool exists?
+
+TLDR: Honestly I never looked for anything similar and coded this straight
+away for my own purpose. 
 
 I was bothered by systems which refuse to take work after 8pm into acount
 or add an extra 30min break no matter if taken or not. So I switched to 
 a trust based worktime system in my company. That means no more timestamping.
 However in order to have some control and also an insurance in the worst case
-I thought I need a timestamp tool.
+I thought I need a more flexible timestamp tool which can do especially these things:
 
-Be sure that this one is capable of taking even extraordinary worktimes into
-account. By definition here a day ends when the user ends it. 
-That can be past 12pm as well and it still count's toward the day before 12pm.
+* It will always do the calculations on query time based on it's raw files. So it is always possible to change the way things are calculated and displayed 
+afterwards.
 
-Furthermore the possibility to easily edit the raw json files and options
+* It is capable of taking extraordinary worktimes into account. Starting a day at a.e `01.08.2017 11:00` and ending it at `02.08.2017 01:00` is not a problem. The 
+day ends when a user ends it and it will all count towards the start date.
+
+* It allows changing work conditions while keeping the calculations correct. You could work 'that many' minutes per day at 'these' days during a 'certain' timespan 
+and always add other timespans with different workdays and worktime per day.
+
+* The possibility to easily edit the raw json files and options
 to personalize the tool are what I personally like.
+
+* Simple usage and pretty output views on command line but that's probably not an unique thing.
