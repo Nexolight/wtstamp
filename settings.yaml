@@ -57,4 +57,4 @@ specialdays: ["01.01","14.04","17.04","25.05","05.06","01.08","25.12","26.12"]
 
 
 # width of the border
-border_width: 80
+border_width: 100

@@ -395,6 +395,10 @@ class Utils:
         return str
     
     @staticmethod
+    def formatDecH(ts):
+        return str(round(ts/3600,2))+"h"
+    
+    @staticmethod
     def formatDHM(ts):
         txt=""
         wd=86400
