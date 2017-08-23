@@ -21,7 +21,7 @@ class Stamper():
         self.l.info("New workday started at "+ts)
     
     def pause(self):
-        wd = Workday.loadLast(self.historydir)
+        wd = Workday.loadLast(self.historydir).get("workday")
         for breaks in wd.breaks:
             #disallow break when another break is going on
             if(breaks.get("start") and not breaks.get("end")):
@@ -34,7 +34,7 @@ class Stamper():
         self.l.info("Workday paused!")
     
     def resume(self):
-        wd = Workday.loadLast(self.historydir)
+        wd = Workday.loadLast(self.historydir).get("workday")
         found=False
         for breaks in wd.breaks:
             if(breaks.get("start") and not breaks.get("end")):
@@ -49,7 +49,7 @@ class Stamper():
             self.l.info("Workday resumed!")
     
     def end(self):
-        wd = Workday.loadLast(self.historydir)
+        wd = Workday.loadLast(self.historydir).get("workday")
         if(not wd):
             self.l.error("There's no workday started yet")
             return 

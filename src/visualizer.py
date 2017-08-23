@@ -21,7 +21,7 @@ class Visualizer():
         Print infos about a workday
         '''
         #We want to know the last active workday
-        lastwd = Workday.loadLast(settings.get("history_data"))
+        lastwd = Workday.loadLast(settings.get("history_data")).get("workday")
         if(lastwd):
             daystr=datetime.fromtimestamp(lastwd.start).strftime(settings.get("date_format"))
             info=Utils.head("Active Workday: "+daystr,symbol="~")
@@ -81,7 +81,7 @@ class Visualizer():
         nowd=datetime.fromtimestamp(now)
         reqw = Utils.getRequiredWork(now)
         donew = Utils.getDoneWork(self.historydir,now)
-        lastwd = Workday.loadLast(settings.get("history_data"))
+        lastwd = Workday.loadLast(settings.get("history_data")).get("workday")
         width = settings.get("border_width")-11
         c1w=int(width/10*4)
         c2w=int(width/10*3)
@@ -99,8 +99,7 @@ class Visualizer():
         dhDay=Utils.formatHM(donew.get("day"))
         
         thAcc=Utils.formatHM(-reqw.get("now")+donew.get("now"))
-        switchTS=datetime.strptime(settings.get("year_swap")+"."+str(nowd.year), "%d.%m.%Y").timestamp()
-        switchDate=datetime.fromtimestamp(switchTS).strftime(settings.get("date_simple_format"))
+        switchDate=settings.get("year_swap")
             
         info=info=Utils.head("Saldo")
         info+=Utils.pbn()
@@ -128,8 +127,7 @@ class Visualizer():
         '''
         info=Utils.head("Year view:")
         info+=Utils.pbn()
-        info+=self._getTbl(Workday.loadYear(self.historydir,ts))
-        info+=Utils.pb(Utils.pfb(symbol="="))
+        info+=self._getTbl(Workday.loadYear(self.historydir,ts),saldoBefore=0)
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
@@ -140,8 +138,11 @@ class Visualizer():
         '''
         info=Utils.head("Month view:")
         info+=Utils.pbn()
-        info+=self._getTbl(Workday.loadMonth(self.historydir,ts))
-        info+=Utils.pb(Utils.pfb(symbol="="))
+        #print(Utils.getDoneWorkT("until",self.historydir,Utils.getPreviousLastMonthDay(ts)))
+        #print(Utils.getRequiredWorkT("until",Utils.getPreviousLastMonthDay(ts)))
+        #print(Utils.getPreviousLastMonthDay(ts))
+        saldoBefore=Utils.getDoneWorkT("until",self.historydir,Utils.getPreviousLastMonthDay(ts))-Utils.getRequiredWorkT("until",Utils.getPreviousLastMonthDay(ts))
+        info+=self._getTbl(Workday.loadMonth(self.historydir,ts),saldoBefore)
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
@@ -149,50 +150,67 @@ class Visualizer():
     def week(self, ts):
         info=Utils.head("Week view:")
         info+=Utils.pbn()
-        info+=self._getTbl(Workday.loadWeek(self.historydir,ts))
-        info+=Utils.pb(Utils.pfb(symbol="="))
+        saldoBefore=Utils.getDoneWorkT("until",self.historydir,Utils.getPreviousLastWeekDay(ts))-Utils.getRequiredWorkT("until",Utils.getPreviousLastWeekDay(ts))
+        info+=self._getTbl(Workday.loadWeek(self.historydir,ts),saldoBefore)
         info+=Utils.pbn()
         info+=Utils.pbdiv()
         print(info)
     
-    def _getTbl(self, loadedWDs):
+    def _getTbl(self, loadedWDs, saldoBefore=0):
         '''
         Returns a table view of the given loaded workdays
         '''
         info=""
         width = settings.get("border_width")-14
-        c1=int(width/10*3)
-        c2=int(width/10*3)
-        c3=int(width/10*2)
-        c4=int(width/10*2)
-        info+=Utils.pb(Utils.pf("Day",c1)+" | "+Utils.pf("Range",c2)+" | "+Utils.pf("Required",c3)+" | "+Utils.pf("Worked",c4))
+        c1=int(width/10*2.5)
+        c2=int(width/10*2)
+        c3=int(width/10*1.25)
+        c4=int(width/10*1.25)
+        c5=int(width/10*3)
+        sbstr=Utils.pf("Saldo",10)+" ("+Utils.formatHM(saldoBefore,posSign=True)+")"
+        info+=Utils.pb(Utils.pf("Day",c1)+" | "+Utils.pf("Range",c2)+" | "+Utils.pf("Required",c3)+" | "+Utils.pf("Worked",c4)+" | "+Utils.pf(sbstr,c5))
+        ssSaldo=saldoBefore
         for wdIM in loadedWDs:
             t_wd=wdIM.get("workday")
             t_ts=wdIM.get("timestamp")
+            t_date=wdIM.get("date")
             t_dt=datetime.fromtimestamp(t_ts).strftime(settings.get("date_format"))
+            if(t_date == datetime.fromtimestamp(time.time()).date()):
+                t_dt=">> "+t_dt
             if(t_wd and not Utils.isFree(t_ts)):
-                reqdstr=Utils.formatHM(settings.get("calc_cycles").get(wdIM.get("date")).get("minutes_per_day")*60)
+                reqd=settings.get("calc_cycles").get(wdIM.get("date")).get("minutes_per_day")*60
+                reqdstr=Utils.formatHM(reqd)
                 info+=Utils.pb(Utils.pfl())
-                worktime=Utils.formatHM(Utils.getWDStats(t_wd).get("worktime"))
+                wdstats=Utils.getWDStats(t_wd)
+                worktime=Utils.formatHM(wdstats.get("worktime"))
+                reqDiff=wdstats.get("worktime")-reqd
+                ssSaldo+=reqDiff
+                fSaldoStr=Utils.pf(Utils.formatHM(ssSaldo),10)+" ("+Utils.formatHM(reqDiff,posSign=True)+")"
                 w_wds=t_wd.start
                 w_wde=t_wd.end
                 if(not w_wde):#currently open day
                     w_wde=time.time()
-                #range
-                datestr=datetime.fromtimestamp(w_wds).strftime(settings.get("date_format"))
                 wdStart=datetime.fromtimestamp(w_wds).strftime("%H:%M")
                 wdEnd=datetime.fromtimestamp(w_wde).strftime("%H:%M")
-                
-                info+=Utils.pb(Utils.pf(datestr,c1)+" | "+Utils.pf(wdStart+" - "+wdEnd,c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf(worktime,c4))
-            elif(Utils.isFree(t_ts)):
+                info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(wdStart+" - "+wdEnd,c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf(worktime,c4)+" | "+Utils.pf(fSaldoStr,c5))
+            elif(Utils.isFree(t_ts)):#No need to print free days
                 pass
-                #info+=Utils.pb(Utils.pfl())
-                #info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(Utils.formatHM(0),c3)+" | "+Utils.pf(Utils.formatHM(0),c4))
             else:
-                reqdstr=Utils.formatHM(settings.get("calc_cycles").get(wdIM.get("date")).get("minutes_per_day")*60)
+                reqd=settings.get("calc_cycles").get(wdIM.get("date")).get("minutes_per_day")*60
+                reqdstr=Utils.formatHM(reqd)
+                
+                fSaldoStr=""
+                worktimeStr=""
+                if(time.time() > t_ts):
+                    ssSaldo-=reqd
+                    fSaldoStr=Utils.pf(Utils.formatHM(ssSaldo),10)+" ("+Utils.formatHM(-reqd,posSign=True)+")"
+                
                 info+=Utils.pb(Utils.pfl())
-                info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf(Utils.formatHM(0),c4))
+                info+=Utils.pb(Utils.pf(t_dt,c1)+" | "+Utils.pf(" ",c2)+" | "+Utils.pf(reqdstr,c3)+" | "+Utils.pf("",c4)+" | "+Utils.pf(fSaldoStr,c5))
                 #info+=Utils.pb(str(wkm.get("date"))+" free")
+        info+=Utils.pb(Utils.pfb(symbol="~"))
+        info+=Utils.pb(Utils.pf("End saldo:",c1)+Utils.pf("",c2+c3+c4+9)+" | "+Utils.pf(Utils.formatHM(ssSaldo),c5))
+        info+=Utils.pb(Utils.pfb(symbol="="))
         return info
     
     def _getSingleDay(self, wd):

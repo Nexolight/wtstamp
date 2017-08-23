@@ -112,10 +112,10 @@ class Utils:
             "year":<utc_seconds>
         }
         '''
-        day=Utils.getDoneWorkDay(historydir,ts)
-        week=Utils.getDoneWorkWeek(historydir,ts)
-        month=Utils.getDoneWorkMonth(historydir,ts)
-        year=Utils.getDoneWorkYear(historydir,ts)
+        day=Utils.getDoneWorkT("day",historydir,ts)
+        week=Utils.getDoneWorkT("week",historydir,ts)
+        month=Utils.getDoneWorkT("month",historydir,ts)
+        year=Utils.getDoneWorkT("year",historydir,ts)
         now=year
             
         return {
@@ -125,54 +125,53 @@ class Utils:
             "month":month,
             "year":year
         }
-    
+        
     @staticmethod
-    def getDoneWorkDay(historydir,ts):
+    def getDoneWorkT(type,historydir,ts):
         '''
-        Returns the work done at the given day in seconds
-        '''
-        dateobj=datetime.fromtimestamp(ts).date()
-        wdd = Workday.loadDay(historydir,ts)
-        #Try to use the not yet closed day if any when no file for the current day exists
-        if(not wdd.get("workday") and datetime.fromtimestamp(time.time()).date() == datetime.fromtimestamp(ts).date()):
-            lwd=Workday.loadLast(historydir)
-            if(lwd and Utils.inCalc(lwd.start)):
-                return Utils.getWDStats().get("worktime")
-        elif(wdd.get("workday") and Utils.inCalc(wdd.get("workday").start)):
-            return Utils.getWDStats(wdd.get("workday")).get("worktime")
-        return 0
-    
-    @staticmethod
-    def getDoneWorkWeek(historydir,ts):
-        '''
-        Returns the work done within the week of the given timestamp in seconds
+        Returns the done work depending on <type> in seconds
+        starting from year_swap as long as <ts> is above year_swap
+        
+        type can be:
+        "year"
+        "month"
+        "week"
+        "day"
+        "until"
         '''
         work=0
-        for wdw in Workday.loadWeek(historydir,ts):
-            if(wdw.get("workday") and Utils.inCalc(wdw.get("workday").start)):
-                work+=Utils.getWDStats(wdw.get("workday")).get("worktime")
-        return work
-    
-    @staticmethod
-    def getDoneWorkMonth(historydir,ts):
-        '''
-        Returns the work done within the month of the given timestamp in seconds
-        '''
-        work=0
-        for wdm in Workday.loadMonth(historydir,ts):
-            if(wdm.get("workday") and Utils.inCalc(wdm.get("workday").start)):
-                work+=Utils.getWDStats(wdm.get("workday")).get("worktime")
-        return work
-    
-    @staticmethod
-    def getDoneWorkYear(historydir,ts):
-        '''
-        Returns the work done within the year of the given timestamp in seconds
-        '''
-        work=0
-        for wdy in Workday.loadYear(historydir,ts):
-            if(wdy.get("workday") and Utils.inCalc(wdy.get("workday").start)):
-                work+=Utils.getWDStats(wdy.get("workday")).get("worktime")
+        wdos=[]
+        if(type=="year"):
+            wdos=Workday.loadYear(historydir,ts)
+        elif(type=="month"):
+            wdos=Workday.loadMonth(historydir,ts)
+        elif(type=="week"):
+            wdos=Workday.loadWeek(historydir,ts)
+        elif(type=="day"):
+            wdd=Workday.loadDay(historydir,ts)
+            if(not wdd.get("workday") and datetime.fromtimestamp(time.time()).date() == givenDate):
+                wdos.append(Workday.loadLast(historydir)) #this happens when a workday is longer than 12pm
+            else:
+                wdos.append(wdd)
+        elif(type=="until"):
+            wdos=Workday.loadYear(historydir,ts)
+        
+        givenDate=datetime.fromtimestamp(ts).date()
+        
+        for wdo in wdos:
+            if(not type=="until"):
+                if(not wdo.get("workday") or not Utils.inCalc(wdo.get("workday").start)):
+                    continue #Just a day without a saved workday object or out of our calc range
+                work+=Utils.getWDStats(wdo.get("workday")).get("worktime")
+            else:#type==until
+                if(ts<wdos[0].get("timestamp")):# year_swap workaround
+                    return work
+                
+                if(wdo.get("workday") and Utils.inCalc(wdo.get("workday").start)):
+                    print(str(givenDate)+" = "+str(wdo.get("date")))
+                    work+=Utils.getWDStats(wdo.get("workday")).get("worktime")
+                if(type=="until" and wdo.get("date") == givenDate):
+                    break # for "until" we break here
         return work
             
     
@@ -188,11 +187,11 @@ class Utils:
             "year":<utc_seconds>
         }
         '''
-        now=Utils.getRequiredWorkNow()
-        day=Utils.getRequiredWorkDay(ts)
-        week=Utils.getRequiredWorkWeek(ts)
-        month=Utils.getRequiredWorkMonth(ts)
-        year=Utils.getRequiredWorkYear(ts)
+        now=Utils.getRequiredWorkT("until",time.time())
+        day=Utils.getRequiredWorkT("day",ts)
+        week=Utils.getRequiredWorkT("week",ts)
+        month=Utils.getRequiredWorkT("month",ts)
+        year=Utils.getRequiredWorkT("year",ts)
         return{
             "now":now,
             "day":day,
@@ -201,57 +200,86 @@ class Utils:
             "year":year
         }
         
-    @staticmethod
-    def getRequiredWorkNow():
-        work=0
-        now=time.time()
-        for mothdts in Utils.getYearDates(now):
-            if(not Utils.isFree(mothdts.get("timestamp"))):
-                work+=Utils.getMinutesPerDay(mothdts.get("timestamp"))
-            if(mothdts.get("date")==datetime.fromtimestamp(now).date()):
-                break
-        return work;
+        
         
     @staticmethod
-    def getRequiredWorkDay(ts):
+    def getRequiredWorkT(type,ts):
         '''
-        returns the work to be done this day
+        Returns the required work depending on <type> in seconds
+        starting from year_swap as long as <ts> is above year_swap
+        
+        type can be:
+        "year"
+        "month"
+        "week"
+        "day"
+        "until"
         '''
-        if(not Utils.isFree(ts)):
+        work=0
+        dates=[]
+        if(type=="year"):
+            dates=Utils.getYearDates(ts)
+        elif(type=="month"):
+            dates=Utils.getMonthdates(ts)
+        elif(type=="week"):
+            dates=Utils.getWeekdates(ts)
+        elif(type=="day"):
             return Utils.getMinutesPerDay(ts)
-        return 0
-    
-    @staticmethod
-    def getRequiredWorkWeek(ts):
-        '''
-        returns the work to be done this week
-        '''
-        work=0
-        for weekdate in Utils.getWeekdates(ts): #cumulate time for all non free days
-            if(not Utils.isFree(weekdate.get("timestamp"))):
-                work+=Utils.getMinutesPerDay(weekdate.get("timestamp"))
-        return work
+        elif(type=="until"):
+            dates=Utils.getYearDates(ts)
+            
+        if(ts<dates[0].get("timestamp")):# year_swap workaround
+            return work
         
-    
-    @staticmethod
-    def getRequiredWorkMonth(ts):
-        '''
-        returns the work to be done this month
-        '''
-        work=0
-        for wkd in Utils.getMonthdates(ts):
-            if(not Utils.isFree(wkd.get("timestamp"))):
-                work+=Utils.getMinutesPerDay(wkd.get("timestamp"))
+        givenDate=datetime.fromtimestamp(ts).date()
+        for dat in dates:
+            if(not Utils.isFree(dat.get("timestamp"))):
+                work+=Utils.getMinutesPerDay(dat.get("timestamp"))
+            
+            #We want to stop here for "until" otherwise we
+            #take all values.
+            if(type=="until" and dat.get("date")==givenDate):
+                break
         return work
     
+    @staticmethod
+    def getPreviousLastMonthDay(ts):
+        '''
+        Returns the last day of the previous month as a timestamp
+        '''
+        dat=datetime.fromtimestamp(ts).date()
+        lYear=dat.year
+        lMonth=dat.month-1
+        if(lMonth<1):
+            lMonth=12
+            lYear-=1
+        lDay=monthrange(lYear,lMonth)[1]
+        return datetime.strptime(str(lDay)+"."+str(lMonth)+"."+str(lYear),"%d.%m.%Y").timestamp()
     
     @staticmethod
-    def getRequiredWorkYear(ts):
-        work=0
-        for mothdts in Utils.getYearDates(ts):
-            if(not Utils.isFree(mothdts.get("timestamp"))):
-                work+=Utils.getMinutesPerDay(mothdts.get("timestamp"))
-        return work
+    def getPreviousLastYearDay(ts):
+        '''
+        Returns the last day of the previous "year" as a timestamp
+        The start of the year is defined by year_swap, so this is one day
+        before year_swap
+        '''
+        datnow=datetime.fromtimestamp(ts).date()
+        swap=settings.get("year_swap").split(".")
+        yearstart=datetime.strptime(swap[0]+"."+swap[1]+"."+str(datnow.year), "%d.%m.%Y").timestamp()
+        return yearstart-86400
+    
+    @staticmethod
+    def getPreviousLastWeekDay(ts):
+        '''
+        Returns the last day of the previous week as a timestamp
+        '''
+        while True:
+            ts-=3600
+            dat=datetime.fromtimestamp(ts).date()
+            if(dat.weekday()==6):#sunday
+                #strip time
+                return datetime.strptime(str(dat.day)+"."+str(dat.month)+"."+str(dat.year), "%d.%m.%Y").timestamp()
+        
     
     @staticmethod
     def inCalc(ts):
@@ -399,8 +427,16 @@ class Utils:
         return str(round(ts/3600,2))+"h"
     
     @staticmethod
-    def formatDHM(ts):
+    def formatDHM(ts,posSign=False):
+        '''
+        Formats seconds to a day, hours and minutes string
+        '''
         txt=""
+        if(ts<0):
+          txt+="-"
+          ts=abs(ts)  
+        elif(posSign and ts>=0):
+            txt+="+"
         wd=86400
         daysf=ts/wd
         if(daysf > 0):
@@ -424,8 +460,16 @@ class Utils:
         return txt
     
     @staticmethod
-    def formatHM(ts):
+    def formatHM(ts,posSign=False):
+        '''
+        Formats seconds to a hours and minutes string
+        '''
         txt=""
+        if(ts<0):
+          txt+="-"
+          ts=abs(ts)  
+        elif(posSign and ts>=0):
+            txt+="+"
         hoursf=ts/3600
         if(hoursf > 0):
             hours=floor(hoursf)

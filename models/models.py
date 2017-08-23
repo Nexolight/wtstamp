@@ -34,14 +34,15 @@ class Workday():
         '''
         Returns the last not yet closed <Workday>
         '''
+        now=time.time()
         for root,dirs,files in os.walk(historydir,topdown=True):
             for name in files:
                 #open & deserialize
                 with open(os.path.join(root,name),"r") as f:
                     wd = json.load(f,cls=WorkdayJSONDecoder)
                     if(not wd.end):
-                        return wd
-        return None
+                        return {"date":datetime.fromtimestamp(wd.start).date(), "workday":wd,"timestamp":wd.start}
+        return {"date":datetime.fromtimestamp(now).date(), "workday":None,"timestamp":now}
     
     @staticmethod
     def loadDay(historydir,ts):
@@ -109,7 +110,6 @@ class Workday():
                     wd = json.load(f,cls=WorkdayJSONDecoder)
             workdays.append({"date":yeardate.get("date"),"workday":wd,"timestamp":yeardate.get("timestamp")})
         return workdays
-            
         
     def persist(self, historydir, askoverride=False):
         '''

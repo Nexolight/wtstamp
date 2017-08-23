@@ -28,7 +28,9 @@ class CMD():
 		ap.add_argument("-W", "--display-week", dest="display_week", default=None, const=time.time(), nargs="?", metavar="dd.mm.yyyy", help="Displays summary of week")
 		ap.add_argument("-M", "--display-month", dest="display_month", default=None, const=time.time(), nargs="?", metavar="mm.yyyy", help="Displays summary of month")
 		ap.add_argument("-Y", "--display-year", dest="display_year", default=None, const=time.time(), nargs="?", metavar="yyyy", help="Displays summary of the year")
+		ap.add_argument("-X", "--display-proc", dest="display_proc", help="Shows how long the calculation took",action="store_true")
 		
+		now=time.time()*1000
 		SettingsHelper.rangesToArray()
 		stamper = Stamper()
 		visualizer = Visualizer()
@@ -66,6 +68,9 @@ class CMD():
 				visualizer.day(ts)
 			else:
 				visualizer.ongoing()
+		
+		if(args.display_proc):
+			self.l.info("Calculation took "+str((time.time()*1000)-now)+"ms")
 			
 			
 	def print_head(self):
