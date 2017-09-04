@@ -166,9 +166,7 @@ class Utils:
             else:#type==until
                 if(ts<wdos[0].get("timestamp")):# year_swap workaround
                     return work
-                
                 if(wdo.get("workday") and Utils.inCalc(wdo.get("workday").start)):
-                    print(str(givenDate)+" = "+str(wdo.get("date")))
                     work+=Utils.getWDStats(wdo.get("workday")).get("worktime")
                 if(type=="until" and wdo.get("date") == givenDate):
                     break # for "until" we break here
