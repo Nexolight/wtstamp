@@ -39,7 +39,7 @@ class CMD():
 		ap.add_argument("-Y", "--display-year", dest="display_year", default=None, const=time.time(), nargs="?", metavar="yyyy", help="Displays summary of the year")
 		ap.add_argument("-X", "--display-proc", dest="display_proc", help="Shows how long the calculation took",action="store_true")
 		gEditAp.add_argument("-s", "--set-start", dest="set_start", metavar=("<HH:MM>","dd.mm.yyyy"), nargs="+", help="Set the start time from the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
-		gEditAp.add_argument("-e", "--set-end", dest="set_end", metavar=("<dd.mm.yyyy-HH:MM>", "dd.mm.yyyy"), nargs="+", help="Set the end time for the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
+		gEditAp.add_argument("-e", "--set-end", dest="set_end", metavar=("<dd.mm.yyyy:HH:MM>", "dd.mm.yyyy"), nargs="+", help="Set the end time for the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		gEditAp.add_argument("-S", "--move-start", dest="move_start", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the start time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		gEditAp.add_argument("-E", "--move-end", dest="move_end", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the end time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		#gEditAp.add_argument("-b", "--insert-break", dest="insert_break", metavar=("<dd.mm.yyyy>", "<HH:MM>", "<+HH:MM>"), nargs=3, help="Insert a break into the given day, at the given time with the given offset.")
@@ -93,7 +93,12 @@ class CMD():
 					ts = datetime.strptime(args.set_start[1], "%d.%m.%Y").timestamp()
 				stamper.moveStart(newTime, ts=ts, visualizer=visualizer, noOffset=True)
 			elif args.set_end and len(args.set_end) >= 1:
-				newTime = datetime.strptime(args.set_end[0], "%H:%M").timestamp() +2208992400 #epoch
+				newTime=0
+				self.l.info(args.set_end[0])
+				if("." in args.set_end[0]):
+					newTime = datetime.strptime(args.set_end[0], "%d.%m.%Y:%H:%M").timestamp()
+				else:
+					newTime = datetime.strptime(args.set_end[0], "%H:%M").timestamp() +2208992400 #epoch
 				ts=None
 				if(len(args.set_end) >= 2):
 					ts = datetime.strptime(args.set_end[1], "%d.%m.%Y").timestamp()

@@ -117,7 +117,7 @@ class Stamper():
         
         newEnd=0
         if(noOffset == True):
-            newEnd = datetime.strptime(datetime.fromtimestamp(wd.end).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp() + seconds
+            newEnd = seconds
         else:
             newEnd = wd.end + seconds
         

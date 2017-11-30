@@ -18,7 +18,26 @@ Lucy von Kaenel - snow.dream.ch@gmail.com
 |                                                                             |
 |-----------------------------------------------------------------------------|
 usage: wtstamp.py [-h] [-n] [-p] [-r] [-e] [-S] [-L] [-D [dd.mm.yyyy]]
-                  [-W [dd.mm.yyyy]] [-M [mm.yyyy]] [-Y [yyyy]]
+                  [-W [dd.mm.yyyy]] [-M [mm.yyyy]] [-Y [yyyy]] {edit}
+                  
+positional arguments:
+  {edit}                             Advanced Options
+  
+  -s, --set-start     <HH:MM> [dd.mm.yyyy] 
+                                     Set the start time from the given day. When no day is given 
+                                     either the last open day (1st) or the last closed day (2nd) is choosen
+  -e, --set-end       <HH:MM | dd.mm.yyyy:HH:MM> [dd.mm.yyyy]
+                                     Set the end time for the given day. When no day is given 
+                                     either the last open day (1st) or the last closed day (2nd) is choosen.
+  
+  -S, --move-start    <<s/+>HH:MM> [dd.mm.yyyy]
+                                     Moves the start time from the given day (+=forward, s=backward). 
+                                     When no day is given either the last open day (1st)
+                                     or the last closed day (2nd) is choosen.
+  -E, --move-End      <<s/+>HH:MM> [dd.mm.yyyy]
+                                     Moves the end time from the given day (+=forward, s=backward). 
+                                     When no day is given either the last open day (1st)
+                                      or the last closed day (2nd) is choosen
 
 optional arguments:
   -h, --help                         show this help message and exit
@@ -32,6 +51,7 @@ optional arguments:
   -W, --display-week  [dd.mm.yyyy]   Displays summary of week - default this week
   -M, --display-month [mm.yyyy]      Displays summary of month - default this month
   -Y, --display-year  [yyyy]         Displays summary of the year
+  -X, --display-proc                 Shows how long the caluclation took
 
 ```
 
@@ -60,6 +80,12 @@ to keep things portable.
 
 * Start/End a Workday (only one open at a time. Mistakes require a simple json edit)
 * Start/Stop breaks
+* Move or set workday start & end times.
+
+
+Note: You can always remove or edit the workday files manually. They are found within
+the application_data directory (see settings.yaml) 
+
 
 **Views:**
 
