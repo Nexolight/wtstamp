@@ -42,7 +42,7 @@ class CMD():
 		gEditAp.add_argument("-e", "--set-end", dest="set_end", metavar=("<dd.mm.yyyy-HH:MM>", "dd.mm.yyyy"), nargs="+", help="Set the end time for the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		gEditAp.add_argument("-S", "--move-start", dest="move_start", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the start time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		gEditAp.add_argument("-E", "--move-end", dest="move_end", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the end time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
-		gEditAp.add_argument("-b", "--insert-break", dest="insert_break", metavar=("<dd.mm.yyyy>", "<HH:MM>", "<+HH:MM>"), nargs=3, help="Insert a break into the given day, at the given time with the given offset.")
+		#gEditAp.add_argument("-b", "--insert-break", dest="insert_break", metavar=("<dd.mm.yyyy>", "<HH:MM>", "<+HH:MM>"), nargs=3, help="Insert a break into the given day, at the given time with the given offset.")
 
 		
 		now=time.time()*1000
@@ -86,14 +86,18 @@ class CMD():
 		
 		
 		if args.subap == "edit":
-			if args.set_start and len(args.set_start) == 1:
-				pass
-			elif args.set_start and len(args.set_start) == 2:
-				pass
-			elif args.set_end and len(args.set_end) == 1:
-				pass
-			elif args.set_end and len(args.set_end) == 2:
-				pass
+			if args.set_start and len(args.set_start) >= 1:
+				newTime = datetime.strptime(args.set_start[0], "%H:%M").timestamp() +2208992400 #epoch
+				ts=None
+				if(len(args.set_start) >= 2):
+					ts = datetime.strptime(args.set_start[1], "%d.%m.%Y").timestamp()
+				stamper.moveStart(newTime, ts=ts, visualizer=visualizer, noOffset=True)
+			elif args.set_end and len(args.set_end) >= 1:
+				newTime = datetime.strptime(args.set_end[0], "%H:%M").timestamp() +2208992400 #epoch
+				ts=None
+				if(len(args.set_end) >= 2):
+					ts = datetime.strptime(args.set_end[1], "%d.%m.%Y").timestamp()
+				stamper.moveEnd(newTime, ts=ts, visualizer=visualizer, noOffset=True)
 			elif args.move_start and len(args.move_start) >= 1:
 				newOffsetStr = args.move_start[0][1:]
 				newOffset = datetime.strptime(newOffsetStr, "%H:%M").timestamp() +2208992400 #epoch

@@ -74,16 +74,22 @@ class Stamper():
         
     def updateWorktime(self, wd):
         stats = Utils.getWDStats(wd)
-        self.l.debug("worktime: "+datetime.utcfromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
-        self.l.debug("breaktime: "+datetime.utcfromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
+        self.l.debug("worktime: "+datetime.fromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
+        self.l.debug("breaktime: "+datetime.fromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
     
-    def moveStart(self, seconds, ts=None, visualizer=None):
+    def moveStart(self, seconds, ts=None, visualizer=None, noOffset=False):
         wd = Utils.evalEditDay(self.historydir,ts)
         if(not wd):
             self.l.error("Unable to find the specified, currently open or last workday")
             return
-        newStart = wd.start + seconds
-        oldStartDayTS = datetime.strptime(datetime.utcfromtimestamp(wd.start).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp()
+        
+        newStart=0
+        if(noOffset == True):
+            newStart = datetime.strptime(datetime.fromtimestamp(wd.start).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp() + seconds
+        else:
+            newStart = wd.start + seconds
+        
+        oldStartDayTS = datetime.strptime(datetime.fromtimestamp(wd.start).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp()
         self.l.info("Using "+datetime.fromtimestamp(wd.start).strftime(settings.get("time_format")))
         if(visualizer):
             visualizer.day(wd.start)
@@ -103,12 +109,18 @@ class Stamper():
         if(visualizer):
             visualizer.day(newStart)
             
-    def moveEnd(self, seconds, ts=None, visualizer=None):
+    def moveEnd(self, seconds, ts=None, visualizer=None, noOffset=False):
         wd = Utils.evalEditDay(self.historydir,ts)
         if(not wd):
             self.l.error("Unable to find the specified, currently open or last workday")
             return
-        newEnd = wd.end + seconds
+        
+        newEnd=0
+        if(noOffset == True):
+            newEnd = datetime.strptime(datetime.fromtimestamp(wd.end).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp() + seconds
+        else:
+            newEnd = wd.end + seconds
+        
         if(newEnd <= wd.start):
             self.l.error("REFUSED: The new date can't be less recent than the start of this workday")
             return
