@@ -74,8 +74,8 @@ class Stamper():
         
     def updateWorktime(self, wd):
         stats = Utils.getWDStats(wd)
-        self.l.debug("worktime: "+datetime.fromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
-        self.l.debug("breaktime: "+datetime.fromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
+        self.l.debug("worktime: "+datetime.utcfromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
+        self.l.debug("breaktime: "+datetime.utcfromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
     
     def moveStart(self, seconds, ts=None, visualizer=None, noOffset=False):
         '''
