@@ -101,7 +101,7 @@ class Stamper():
         if(newStart <= oldStartDayTS):
             self.l.error("REFUSED: The new date would end up beeing from the previous day which isn't allowed")
             return
-        if(newStart >= wd.end):
+        if(wd.end and newStart >= wd.end):
             self.l.error("REFUSED: The new date can't be more recent than the end of this workday")
             return
         for brk in wd.breaks:
@@ -117,13 +117,13 @@ class Stamper():
     def moveEnd(self, seconds, ts=None, visualizer=None, setDirect=False, setFromDaystart=False):
         '''
         Normally this moves the time of the <Workday> (ts) forward or backward.
-        When no ts is given, the last open (1st) or the last closed (2nd) <Workday> is used.
+        When no ts is given, the last closed <Workday> is used.
         When setDirect is used it will apply seconds like a full timestamp and when setFromDaystart
         is used it will apply seconds to the begin of the used <Workday>
         '''
-        wd = Utils.evalEditDay(self.historydir,ts)
+        wd = Utils.evalEditDay(self.historydir,ts,noOpenDays=True)
         if(not wd):
-            self.l.error("Unable to find the specified, currently open or last workday")
+            self.l.error("Unable to find the specified or last workday")
             return
         
         newEnd=0

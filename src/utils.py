@@ -350,17 +350,18 @@ class Utils:
         }
     
     @staticmethod
-    def evalEditDay(historydir, ts=None):
+    def evalEditDay(historydir, ts=None, noOpenDays=False):
         '''
-        When no timestamp is given, 1st the last open day is looked up, then
-        2nd the last closed day is looked up.
+        When no timestamp is given, 1st. the last open day is looked up, then
+        2nd. the last closed day is looked up.
+        if noOpenDays is True it will ignore not yet closed days
         In case a timestamp is given the specified day is looked up.
         returns <Workday> or None
         '''
         wd = None
         if(not ts):
             wdObj = Workday.loadLast(historydir)
-            if(not wdObj.get("workday")):
+            if(noOpenDays == True or not wdObj.get("workday")):
                 wd = Workday.loadLastNDay(historydir,time.time());
             else:
                 wd = wdObj.get("workday")

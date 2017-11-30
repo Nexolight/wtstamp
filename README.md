@@ -27,8 +27,8 @@ positional arguments:
                                      Set the start time from the given day. When no day is given 
                                      either the last open day (1st) or the last closed day (2nd) is choosen
   -e, --set-end       <HH:MM | dd.mm.yyyy:HH:MM> [dd.mm.yyyy]
-                                     Set the end time for the given day. When no day is given 
-                                     either the last open day (1st) or the last closed day (2nd) is choosen.
+                                     Set the end time for the given day. 
+                                     When no day is given, then the last closed day is choosen.
   
   -S, --move-start    <<s/+>HH:MM> [dd.mm.yyyy]
                                      Moves the start time from the given day (+=forward, s=backward). 
@@ -36,8 +36,7 @@ positional arguments:
                                      or the last closed day (2nd) is choosen.
   -E, --move-End      <<s/+>HH:MM> [dd.mm.yyyy]
                                      Moves the end time from the given day (+=forward, s=backward). 
-                                     When no day is given either the last open day (1st)
-                                      or the last closed day (2nd) is choosen
+                                     When no day is given, then the last closed day is choosen.
 
 optional arguments:
   -h, --help                         show this help message and exit
