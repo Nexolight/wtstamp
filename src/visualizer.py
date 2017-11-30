@@ -38,13 +38,7 @@ class Visualizer():
         Prints the last closed day
         '''
         #dateObjNow=datetime.fromtimestamp(time.time()).date()
-        wd=None
-        for ydObj in reversed(Utils.getYearDates(time.time())):
-            loadedWDObj=Workday.loadDay(self.historydir,ydObj.get("timestamp"))
-            lwd=loadedWDObj.get("workday")
-            if(lwd and lwd.end):
-                wd=lwd
-                break
+        wd=Workday.loadLastNDay(self.historydir,time.time())
         if(wd):
             daystr=datetime.fromtimestamp(wd.start).strftime(settings.get("date_format"))
             info=Utils.head("Day: "+daystr,symbol="~")

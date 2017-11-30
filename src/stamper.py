@@ -77,5 +77,54 @@ class Stamper():
         self.l.debug("worktime: "+datetime.utcfromtimestamp(stats.get("worktime")).strftime("%Hh %Mm %Ss"))
         self.l.debug("breaktime: "+datetime.utcfromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
     
-    
+    def moveStart(self, seconds, ts=None, visualizer=None):
+        wd = Utils.evalEditDay(self.historydir,ts)
+        if(not wd):
+            self.l.error("Unable to find the specified, currently open or last workday")
+            return
+        newStart = wd.start + seconds
+        oldStartDayTS = datetime.strptime(datetime.utcfromtimestamp(wd.start).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp()
+        self.l.info("Using "+datetime.fromtimestamp(wd.start).strftime(settings.get("time_format")))
+        if(visualizer):
+            visualizer.day(wd.start)
+        if(newStart <= oldStartDayTS):
+            self.l.error("REFUSED: The new date would end up beeing from the previous day which isn't allowed")
+            return
+        if(newStart >= wd.end):
+            self.l.error("REFUSED: The new date can't be more recent than the end of this workday")
+            return
+        for brk in wd.breaks:
+            if(brk.start <= newStart):
+                self.l.error("REFUSED: The new date can't be more recent than the first started break of this workday")
+                return
+        self.l.info("Changed to "+datetime.fromtimestamp(newStart).strftime(settings.get("time_format")))
+        wd.start = newStart
+        wd.persist(self.historydir);
+        if(visualizer):
+            visualizer.day(newStart)
+            
+    def moveEnd(self, seconds, ts=None, visualizer=None):
+        wd = Utils.evalEditDay(self.historydir,ts)
+        if(not wd):
+            self.l.error("Unable to find the specified, currently open or last workday")
+            return
+        newEnd = wd.end + seconds
+        if(newEnd <= wd.start):
+            self.l.error("REFUSED: The new date can't be less recent than the start of this workday")
+            return
+        for brk in wd.breaks:
+            if(brk.end >= newEnd):
+                self.l.error("REFUSED: The new date can't be less recent than the last ended break of this workday")
+                return
+        self.l.info("Using "+datetime.fromtimestamp(wd.end).strftime(settings.get("time_format")))
+        if(visualizer):
+            visualizer.day(wd.start)
+        self.l.info("Changed to "+datetime.fromtimestamp(newEnd).strftime(settings.get("time_format")))
+        wd.end = newEnd
+        wd.persist(self.historydir);
+        if(visualizer):
+            visualizer.day(wd.start)
+                
+        
+        
         

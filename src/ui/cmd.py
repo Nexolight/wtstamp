@@ -1,6 +1,8 @@
 import argparse
 import logging
 import time
+import shutil
+import os
 from datetime import datetime
 import sys
 from src.stamper import Stamper
@@ -17,7 +19,14 @@ class CMD():
 	#---------------------------------------------------------------------------
 	def __init__(self):
 		self.l = logging.getLogger(__name__+"."+self.__class__.__name__)
+		cols, rows = shutil.get_terminal_size((100, 50))
+		os.environ['COLUMNS'] = str(cols);
+		
 		ap = argparse.ArgumentParser()
+		subParser = ap.add_subparsers(dest="subap", help='Advanced Options')
+		editAp = subParser.add_parser("edit")
+		gEditAp = editAp.add_mutually_exclusive_group(required=True)
+		
 		ap.add_argument("-n", "--stamp-new", dest="stamp_new", help="Starts a new workday",action="store_true")
 		ap.add_argument("-p", "--stamp-pause", dest="stamp_pause", help="Pauses the current workday",action="store_true")
 		ap.add_argument("-r", "--stamp-resume", dest="stamp_resume", help="Resumes the current workday",action="store_true")
@@ -29,6 +38,12 @@ class CMD():
 		ap.add_argument("-M", "--display-month", dest="display_month", default=None, const=time.time(), nargs="?", metavar="mm.yyyy", help="Displays summary of month")
 		ap.add_argument("-Y", "--display-year", dest="display_year", default=None, const=time.time(), nargs="?", metavar="yyyy", help="Displays summary of the year")
 		ap.add_argument("-X", "--display-proc", dest="display_proc", help="Shows how long the calculation took",action="store_true")
+		gEditAp.add_argument("-s", "--set-start", dest="set_start", metavar=("<HH:MM>","dd.mm.yyyy"), nargs="+", help="Set the start time from the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
+		gEditAp.add_argument("-e", "--set-end", dest="set_end", metavar=("<dd.mm.yyyy-HH:MM>", "dd.mm.yyyy"), nargs="+", help="Set the end time for the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
+		gEditAp.add_argument("-S", "--move-start", dest="move_start", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the start time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
+		gEditAp.add_argument("-E", "--move-end", dest="move_end", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the end time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
+		gEditAp.add_argument("-b", "--insert-break", dest="insert_break", metavar=("<dd.mm.yyyy>", "<HH:MM>", "<+HH:MM>"), nargs=3, help="Insert a break into the given day, at the given time with the given offset.")
+
 		
 		now=time.time()*1000
 		SettingsHelper.rangesToArray()
@@ -68,6 +83,38 @@ class CMD():
 				visualizer.day(ts)
 			else:
 				visualizer.ongoing()
+		
+		
+		if args.subap == "edit":
+			if args.set_start and len(args.set_start) == 1:
+				pass
+			elif args.set_start and len(args.set_start) == 2:
+				pass
+			elif args.set_end and len(args.set_end) == 1:
+				pass
+			elif args.set_end and len(args.set_end) == 2:
+				pass
+			elif args.move_start and len(args.move_start) >= 1:
+				newOffsetStr = args.move_start[0][1:]
+				newOffset = datetime.strptime(newOffsetStr, "%H:%M").timestamp() +2208992400 #epoch
+				if(args.move_start[0][:1] == "s"):
+					newOffset = newOffset * -1
+				ts=None
+				if(len(args.move_start) >= 2):
+					ts=datetime.strptime(args.move_start[1], "%d.%m.%Y").timestamp()
+				stamper.moveStart(newOffset, ts=ts, visualizer=visualizer)
+			elif args.move_end and len(args.move_end) >= 1:
+				newOffsetStr = args.move_end[0][1:]
+				newOffset = datetime.strptime(newOffsetStr, "%H:%M").timestamp() +2208992400 #epoch
+				if(args.move_end[0][:1] == "s"):
+					newOffset = newOffset * -1
+				ts=None
+				if(len(args.move_end) >= 2):
+					ts=datetime.strptime(args.move_end[1], "%d.%m.%Y").timestamp()
+				stamper.moveEnd(newOffset, ts=ts, visualizer=visualizer)
+			elif args.insert_break and len(args.insert_break) == 3:
+				pass
+		
 		
 		if(args.display_proc):
 			self.l.info("Calculation took "+str((time.time()*1000)-now)+"ms")

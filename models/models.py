@@ -58,6 +58,25 @@ class Workday():
         return {"date":datetime.fromtimestamp(ts).date(), "workday":wd,"timestamp":ts}
     
     @staticmethod
+    def loadLastNDay(historydir,ts,offset=0):
+        '''
+        Returns the Nth closed <Workday> within the year of the given timestamp
+        or None. Offset 0 would be the last closed <Workday> 1 the second last, etc.
+        '''
+        from src.utils import Utils
+        wd=None
+        searchOffset=0
+        for ydObj in reversed(Utils.getYearDates(ts)):
+            loadedWDObj=Workday.loadDay(historydir,ydObj.get("timestamp"))
+            lwd=loadedWDObj.get("workday")
+            if(lwd and lwd.end and searchOffset == offset):
+                wd=lwd
+                break
+            elif(lwd and lwd.end):
+                searchOffset+=1
+        return wd
+    
+    @staticmethod
     def loadWeek(historydir,ts):
         '''
         Returns a <Workday> for each weekday within the week of the given timestamp like
