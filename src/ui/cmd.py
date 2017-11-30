@@ -94,15 +94,18 @@ class CMD():
 				stamper.moveStart(newTime, ts=ts, visualizer=visualizer, noOffset=True)
 			elif args.set_end and len(args.set_end) >= 1:
 				newTime=0
-				self.l.info(args.set_end[0])
+				setDirect=False
+				setFromDaystart=False
 				if("." in args.set_end[0]):
 					newTime = datetime.strptime(args.set_end[0], "%d.%m.%Y:%H:%M").timestamp()
+					setDirect=True
 				else:
 					newTime = datetime.strptime(args.set_end[0], "%H:%M").timestamp() +2208992400 #epoch
+					setFromDaystart=True
 				ts=None
 				if(len(args.set_end) >= 2):
 					ts = datetime.strptime(args.set_end[1], "%d.%m.%Y").timestamp()
-				stamper.moveEnd(newTime, ts=ts, visualizer=visualizer, noOffset=True)
+				stamper.moveEnd(newTime, ts=ts, visualizer=visualizer, setDirect=setDirect, setFromDaystart=setFromDaystart)
 			elif args.move_start and len(args.move_start) >= 1:
 				newOffsetStr = args.move_start[0][1:]
 				newOffset = datetime.strptime(newOffsetStr, "%H:%M").timestamp() +2208992400 #epoch

@@ -78,6 +78,11 @@ class Stamper():
         self.l.debug("breaktime: "+datetime.fromtimestamp(stats.get("breaktime")).strftime("%Hh %Mm %Ss"))   
     
     def moveStart(self, seconds, ts=None, visualizer=None, noOffset=False):
+        '''
+        Normally this moves the time of the <Workday> (ts) forward or backward.
+        When no ts is given, the last open (1st) or the last closed (2nd) <Workday> is used.
+        When noOffset is used it will will add seconds to the begin of the used <Workday> instead.
+        '''
         wd = Utils.evalEditDay(self.historydir,ts)
         if(not wd):
             self.l.error("Unable to find the specified, currently open or last workday")
@@ -109,14 +114,22 @@ class Stamper():
         if(visualizer):
             visualizer.day(newStart)
             
-    def moveEnd(self, seconds, ts=None, visualizer=None, noOffset=False):
+    def moveEnd(self, seconds, ts=None, visualizer=None, setDirect=False, setFromDaystart=False):
+        '''
+        Normally this moves the time of the <Workday> (ts) forward or backward.
+        When no ts is given, the last open (1st) or the last closed (2nd) <Workday> is used.
+        When setDirect is used it will apply seconds like a full timestamp and when setFromDaystart
+        is used it will apply seconds to the begin of the used <Workday>
+        '''
         wd = Utils.evalEditDay(self.historydir,ts)
         if(not wd):
             self.l.error("Unable to find the specified, currently open or last workday")
             return
         
         newEnd=0
-        if(noOffset == True):
+        if(setFromDaystart == True):
+            newEnd = datetime.strptime(datetime.fromtimestamp(wd.start).strftime("%d.%m.%Y"), "%d.%m.%Y").timestamp() + seconds
+        elif(setDirect == True):
             newEnd = seconds
         else:
             newEnd = wd.end + seconds
