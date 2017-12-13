@@ -146,7 +146,7 @@ class Workday():
             os.makedirs(dstdir, mode=0o750)
         
         if(os.path.isfile(dstfile) and askoverride):
-            self.l.error("The file for this workday already exists")
+            self.l.error("The file for this workday ("+datetime.fromtimestamp(self.start).strftime(settings.get("date_simple_format"))+") already exists")
             uip = input("Override? [N/y] :")
             if(uip.lower() != "y"):
                 exit(0)

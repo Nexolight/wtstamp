@@ -501,6 +501,16 @@ class Utils:
             minutes=ceil(minutesf)
         txt+=str(minutes)+"m "
         return txt
+    
+    @staticmethod
+    def convertHMToSeconds(str, separator=":"):
+        if(not str.count(separator) == 1):
+            raise ValueError("Invalid format")
+        arr = str.split(separator)
+        s = 0
+        s+=int(arr[0])*3600
+        s+=int(arr[1])*60
+        return s
         
         
         

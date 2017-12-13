@@ -149,7 +149,73 @@ class Stamper():
         wd.persist(self.historydir);
         if(visualizer):
             visualizer.day(wd.start)
-                
+    
+    def insert_workday(self, insertAt, ts, setDirect=False, visualizer=None):
+        '''
+        Normally this tries to insert a workday at the given timestamp with the given positive offset (ts).
+        However, if setDirect is True it will use <ts> as explicit workday end.
+        '''
+        wd = Workday()
+        wd.start = insertAt
+        if(setDirect == True):
+            wd.end = ts
+        else:
+            wd.end = wd.start+ts
+        self.updateWorktime(wd)
+        wd.persist(self.historydir,askoverride=True)
+        self.l.info("New workday inserted at "+datetime.fromtimestamp(wd.start).strftime(settings.get("time_format")))
+        if(visualizer):
+            visualizer.day(wd.start)
+            
+    def insert_break(self, insertAt, breakStart, ts, setDirect=False, visualizer=None):
+        '''
+        Inserts a break into a given workday, starting from the given day and time, ending at the given "ts" (offset)
+        when setDirect is True ts is not an offset but an explicit time.
+        '''
+        wd = Workday.loadDay(self.historydir,insertAt).get("workday")
+        if(not wd):
+            self.l.error("Unable to find the specified workday")
+            return
+        breakEnd=0
+        if(setDirect == True):
+            breakEnd=ts
+        else:
+            breakEnd=breakStart+ts
+        for brk in wd.breaks:
+            if(brk.get("end")):
+                if(breakStart >= brk.get("start") and breakStart <= brk.get("end")):
+                    self.l.error("REFUSED: Conflicting breaks. Requested start: "+datetime.fromtimestamp(breakStart).strftime(settings.get("time_format")))
+                    if(visualizer):
+                        visualizer.day(wd.start)
+                    return
+                elif(breakStart <= brk.get("start") and breakEnd >= brk.get("start")):
+                    self.l.error("REFUSED: Conflicting breaks. Requested end: "+datetime.fromtimestamp(breakEnd).strftime(settings.get("time_format")))
+                    if(visualizer):
+                        visualizer.day(wd.start)
+                    return
+            else:     
+                if(breakStart >= brk.get("start")):
+                    self.l.error("REFUSED: There's a not closed break going on which conflicts with the requested start: "+datetime.fromtimestamp(breakStart).strftime(settings.get("time_format")))
+                    if(visualizer):
+                        visualizer.day(wd.start)
+                    return
+        if(not wd.end):# I don't want to take away the possibility but it's dangerous.
+            uip = input("This workday has not yet ended! Inserting a break which takes longer\n\rthan a finished workday results in undefined behavior!\n\rThe requested break and minimum workday end would be: "+datetime.fromtimestamp(breakEnd).strftime(settings.get("time_format"))+".\n\rDo you want to continue? [N/y] :")
+            if(uip.lower() != "y"):
+                return;
+        elif(wd.end <= breakEnd):
+            self.l.error("REFUSED: Break would end later than the workday ends. Break would end at: "+datetime.fromtimestamp(breakEnd).strftime(settings.get("time_format")))
+            if(visualizer):
+                visualizer.day(wd.start)
+            return
+        wd.breaks.append({"start":breakStart,"end":breakStart+ts})
+        self.updateWorktime(wd)
+        wd.persist(self.historydir)
+        self.l.info("New break inserted at workday "+datetime.fromtimestamp(wd.start).strftime(settings.get("date_simple_format"))+
+                    ". Starts at: "+datetime.fromtimestamp(breakStart).strftime(settings.get("time_format"))+
+                    ". Ends at: "+datetime.fromtimestamp(breakEnd).strftime(settings.get("time_format")))
+        if(visualizer):
+            visualizer.day(wd.start)
         
         
         

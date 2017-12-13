@@ -18,14 +18,16 @@ Lucy von Kaenel - snow.dream.ch@gmail.com
 |                                                                             |
 |-----------------------------------------------------------------------------|
 usage: wtstamp.py [-h] [-n] [-p] [-r] [-e] [-S] [-L] [-D [dd.mm.yyyy]]
-                  [-W [dd.mm.yyyy]] [-M [mm.yyyy]] [-Y [yyyy]] {edit}
+                  [-W [dd.mm.yyyy]] [-M [mm.yyyy]] [-Y [yyyy]] {edit|insert}
                   
 positional arguments:
-  {edit}                             Advanced Options
+  {edit|insert}                      Advanced Options
   
+  {edit}
   -s, --set-start     <HH:MM> [dd.mm.yyyy] 
                                      Set the start time from the given day. When no day is given 
                                      either the last open day (1st) or the last closed day (2nd) is choosen
+                                     
   -e, --set-end       <HH:MM | dd.mm.yyyy:HH:MM> [dd.mm.yyyy]
                                      Set the end time for the given day. 
                                      When no day is given, then the last closed day is choosen.
@@ -34,9 +36,19 @@ positional arguments:
                                      Moves the start time from the given day (+=forward, s=backward). 
                                      When no day is given either the last open day (1st)
                                      or the last closed day (2nd) is choosen.
+                                     
   -E, --move-End      <<s/+>HH:MM> [dd.mm.yyyy]
                                      Moves the end time from the given day (+=forward, s=backward). 
                                      When no day is given, then the last closed day is choosen.
+   
+  {insert}
+  -n, --workday       <dd.mm.yyyy:HH:MM> <HH:MM>
+                                     Inserts a new workday at the given day and time with the 
+                                     specified length as positive offset.
+                                     
+  -b, --break         <dd.mm.yyyy> <dd.mm.yyyy:HH:MM> <HH:MM>
+                                     Inserts a new break into the given workday, starting from the
+                                     given day and time, with the specified positive offset for the break end.
 
 optional arguments:
   -h, --help                         show this help message and exit
@@ -77,9 +89,11 @@ to keep things portable.
 
 **Stamps:**
 
-* Start/End a Workday (only one open at a time. Mistakes require a simple json edit)
-* Start/Stop breaks
+* Start/End a Workday (only one open at a time).
+* Start/Stop breaks.
 * Move or set workday start & end times.
+* Insert Workdays (remove not yet implemented - just remove the json file)
+* Insert Workday breaks (remove not yet implemented - remove them manually from the json file).
 
 
 Note: You can always remove or edit the workday files manually. They are found within
@@ -148,4 +162,4 @@ and always add other timespans with different workdays and worktime per day.
 * The possibility to easily edit the raw json files and options
 to personalize the tool are what I personally like.
 
-* Simple usage and pretty output views on command line but that's probably not an unique thing.
+* Usage and pretty output views on command line but that's probably not an unique thing.

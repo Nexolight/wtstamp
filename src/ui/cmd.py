@@ -26,6 +26,8 @@ class CMD():
 		subParser = ap.add_subparsers(dest="subap", help='Advanced Options')
 		editAp = subParser.add_parser("edit")
 		gEditAp = editAp.add_mutually_exclusive_group(required=True)
+		insertAp = subParser.add_parser("insert")
+		gInsertAp = insertAp.add_mutually_exclusive_group(required=True)
 		
 		ap.add_argument("-n", "--stamp-new", dest="stamp_new", help="Starts a new workday",action="store_true")
 		ap.add_argument("-p", "--stamp-pause", dest="stamp_pause", help="Pauses the current workday",action="store_true")
@@ -42,6 +44,9 @@ class CMD():
 		gEditAp.add_argument("-e", "--set-end", dest="set_end", metavar=("<dd.mm.yyyy:HH:MM>", "dd.mm.yyyy"), nargs="+", help="Set the end time for the given day. When no day is given, then the last closed day is choosen.")
 		gEditAp.add_argument("-S", "--move-start", dest="move_start", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the start time from the given day (+=forward, s=backward). When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		gEditAp.add_argument("-E", "--move-end", dest="move_end", metavar=("<<s/+>HH:MM>", "dd.mm.yyyy"), nargs="+", help="Moves the end time from the given day (+=forward, s=backward). When no day is given, then the last closed day is choosen.")
+		gInsertAp.add_argument("-n", "--workday", dest="insert_workday", metavar=("<dd.mm.yyyy:HH:MM>", "<HH:MM>"), nargs=2, help="Inserts a new workday at the given day and time with the specified length as positive offset.")
+		gInsertAp.add_argument("-b", "--break", dest="insert_break", metavar=("<dd.mm.yyyy>", "<dd.mm.yyyy:HH:MM>", "<HH:MM>"), nargs=3, help="Inserts a new break into the given workday, starting from the given day and time, with the specified positive offset for the break end")
+		
 		#gEditAp.add_argument("-b", "--insert-break", dest="insert_break", metavar=("<dd.mm.yyyy>", "<HH:MM>", "<+HH:MM>"), nargs=3, help="Insert a break into the given day, at the given time with the given offset.")
 
 		
@@ -127,6 +132,16 @@ class CMD():
 			elif args.insert_break and len(args.insert_break) == 3:
 				pass
 		
+		if args.subap == "insert":
+			if args.insert_workday:
+				insertAt = datetime.strptime(args.insert_workday[0], "%d.%m.%Y:%H:%M").timestamp()
+				offset = Utils.convertHMToSeconds(args.insert_workday[1],separator=":")
+				stamper.insert_workday(insertAt, offset, setDirect=False, visualizer=visualizer)
+			elif args.insert_break:
+				insertAt = datetime.strptime(args.insert_break[0], "%d.%m.%Y").timestamp()
+				bStart = datetime.strptime(args.insert_break[1], "%d.%m.%Y:%H:%M").timestamp()
+				offset = Utils.convertHMToSeconds(args.insert_break[2],separator=":")
+				stamper.insert_break(insertAt, bStart, offset, setDirect=False, visualizer=visualizer)
 		
 		if(args.display_proc):
 			self.l.info("Calculation took "+str((time.time()*1000)-now)+"ms")
