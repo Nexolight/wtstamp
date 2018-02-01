@@ -1,5 +1,5 @@
 from datetime import datetime
-from src import settings
+from src import yamlsettings as settings
 from src.utils import Utils
 
 class SettingsHelper:

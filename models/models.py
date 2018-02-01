@@ -2,7 +2,7 @@ import time
 import os
 import json
 import logging
-from src import settings
+from src import yamlsettings as settings
 from datetime import datetime
 from json.decoder import JSONDecoder
 from json.encoder import JSONEncoder

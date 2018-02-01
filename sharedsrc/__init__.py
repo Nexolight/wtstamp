@@ -1,2 +1,2 @@
 from loader.loader import Loader
-settings = Loader.loadSettings()
+yamlsettings = Loader.loadSettings()

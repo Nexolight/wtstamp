@@ -1,5 +1,5 @@
 import os
-from sharedsrc import settings
+from sharedsrc import yamlsettings as settings
 
 _FORMATERS = {
     'detailed': {

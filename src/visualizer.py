@@ -2,7 +2,7 @@ import logging
 import os
 import time
 from datetime import datetime
-from src import settings
+from src import yamlsettings as settings
 from src.utils import Utils
 from models.models import Workday
 from math import ceil,floor

@@ -3,7 +3,7 @@ import os
 import json
 import time
 from datetime import datetime
-from src import settings
+from src import yamlsettings as settings
 from src.utils import Utils
 from models.models import Workday,WorkdayJSONEncoder,WorkdayJSONDecoder
 
