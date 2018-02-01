@@ -39,7 +39,7 @@ class CMD():
 		ap.add_argument("-D", "--display-day", dest="display_info", default=None, const=time.time(), nargs="?", metavar="dd.mm.yyyy", help="Displays info about a workday")
 		ap.add_argument("-W", "--display-week", dest="display_week", default=None, const=time.time(), nargs="?", metavar="dd.mm.yyyy", help="Displays summary of week")
 		ap.add_argument("-M", "--display-month", dest="display_month", default=None, const=time.time(), nargs="?", metavar="mm.yyyy", help="Displays summary of month")
-		ap.add_argument("-Y", "--display-year", dest="display_year", default=None, const=-1, nargs="?", metavar="yyyy", help="Displays summary of the year")
+		ap.add_argument("-Y", "--display-year", dest="display_year", default=None, const=time.time(), nargs="?", metavar="yyyy", help="Displays summary of the year")
 		ap.add_argument("-X", "--display-proc", dest="display_proc", help="Shows how long the calculation took",action="store_true")
 		gEditAp.add_argument("-s", "--set-start", dest="set_start", metavar=("<HH:MM>","dd.mm.yyyy"), nargs="+", help="Set the start time from the given day. When no day is given either the last open day (1st) or the last closed day (2nd) is choosen.")
 		gEditAp.add_argument("-e", "--set-end", dest="set_end", metavar=("<dd.mm.yyyy:HH:MM>", "dd.mm.yyyy"), nargs="+", help="Set the end time for the given day. When no day is given, then the last closed day is choosen.")
@@ -71,12 +71,6 @@ class CMD():
 		elif args.display_year:
 			if(isinstance(args.display_year, str)):
 				args.display_year=datetime.strptime(args.display_year, "%Y").timestamp()
-			elif(args.display_year == -1):
-				now=time.time()
-				year=datetime.fromtimestamp(now).date().year
-				swap=datetime.strptime(settings.get("year_swap")+"."+str(year),"%d.%m.%Y").timestamp()-86400
-				if(time.time()<swap):
-					args.display_year=swap=datetime.strptime(settings.get("year_swap")+"."+str(year-1),"%d.%m.%Y").timestamp()-86400
 			visualizer.year(args.display_year)
 		elif args.display_last:
 			visualizer.last()

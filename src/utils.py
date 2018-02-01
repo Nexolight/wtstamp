@@ -94,10 +94,17 @@ class Utils:
         '''
         yeardates=[]
         dateobj=datetime.fromtimestamp(ts).date()
+        swap=datetime.strptime(settings.get("year_swap")+"."+str(dateobj.year),"%d.%m.%Y").timestamp()-86400
+        if(ts<swap):
+            ts=swap=datetime.strptime(settings.get("year_swap")+"."+str(dateobj.year-1),"%d.%m.%Y").timestamp()-8640
+            dateobj=datetime.fromtimestamp(ts).date()
         dStart=datetime.strptime(settings.get("year_swap")+"."+str(dateobj.year),"%d.%m.%Y").date()
         lDayTs=datetime.strptime(settings.get("year_swap")+"."+str(dateobj.year),"%d.%m.%Y").timestamp()-86400
         lDayDt=datetime.fromtimestamp(lDayTs).date()
         dEnd=datetime.strptime(str(lDayDt.day)+"."+str(lDayDt.month)+"."+str(dateobj.year+1),"%d.%m.%Y").date()
+        
+        0
+
         return Utils.getDatesFromRange(dStart,dEnd)
     
     @staticmethod
