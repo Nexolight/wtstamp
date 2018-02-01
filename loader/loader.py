@@ -13,7 +13,12 @@ class Loader():
         '''
         home = os.path.expanduser("~")
         spath = os.path.dirname(sys.argv[0])
-        settings = yaml.load(open(os.path.join(spath,"settings.yaml"),"r"))
+        preferedSettings=os.path.join(spath,"settings.yaml")
+        templateSettings=os.path.join(spath,"settings.yaml.template")
+        sfile=templateSettings
+        if(os.path.isfile(preferedSettings)):
+            sfile=preferedSettings
+        settings = yaml.load(open(sfile,"r"))
         for k,v in settings.items():
             if(isinstance(v,str)):
                 settings.update({k:v.replace("USERHOME", home)})

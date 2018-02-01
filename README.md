@@ -82,6 +82,22 @@ All calculations are realtime base on the settings in settings.yaml and these ra
 to keep things portable.
 
 
+### Setup:
+
+Clone the repository:
+
+```
+git clone https://github.com/Nexolight/wtstamp.git
+```
+
+cd into the directory and copy the template settings:
+
+```
+cp settings.yaml.template settings.yaml
+```
+
+Edit settings.yaml to your needs. It is preferred when available.
+
 ---
 
 
