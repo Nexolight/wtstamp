@@ -138,13 +138,13 @@ class Stamper():
             self.l.error("REFUSED: The new date can't be less recent than the start of this workday")
             return
         for brk in wd.breaks:
-            if(brk.end >= newEnd):
+            if(brk.get("end") >= newEnd):
                 self.l.error("REFUSED: The new date can't be less recent than the last ended break of this workday")
                 return
-        self.l.info("Using "+datetime.fromtimestamp(wd.end).strftime(settings.get("time_format")))
+        self.l.info("Using day "+datetime.fromtimestamp(wd.start).strftime(settings.get("time_format")))
         if(visualizer):
             visualizer.day(wd.start)
-        self.l.info("Changed to "+datetime.fromtimestamp(newEnd).strftime(settings.get("time_format")))
+        self.l.info("Changed end to "+datetime.fromtimestamp(newEnd).strftime(settings.get("time_format")))
         wd.end = newEnd
         wd.persist(self.historydir);
         if(visualizer):
